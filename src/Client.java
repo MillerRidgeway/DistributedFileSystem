@@ -1,14 +1,17 @@
 import java.io.*;
 import java.net.*;
-import java.nio.Buffer;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Vector;
 
 // Client class 
 public class Client
 {
+    //-----FILE CHUNKING----------------------------------
     //Split a given file into 64KB chunks
-    public static void chunkFile(File f){
+    public static void chunkFile(File f) throws IOException {
         int chunkCount = 1;
         int fileSize = 64000;
 
@@ -16,7 +19,7 @@ public class Client
 
         String fName = f.getName();
 
-        try(FileInputStream fis = new FileInputStream(f)){
+        try (FileInputStream fis = new FileInputStream(f)){
             BufferedInputStream  bis = new BufferedInputStream(fis);
 
             //Init to 0, assign in while
@@ -30,22 +33,40 @@ public class Client
                 }
             }
         }
-        catch (Exception e)
-        {
-            System.out.println("Error chunking file: " + e);
-        }
     }
 
-    public static void mergeChunks(List<File> files, File dest){
-
+    public static void mergeChunks(List<File> files, File dest) throws IOException {
+        try (FileOutputStream out = new FileOutputStream(dest);
+             BufferedOutputStream mergingStream = new BufferedOutputStream(out)) {
+            for (File f : files) {
+                Files.copy(f.toPath(), mergingStream);
+            }
+        }
     }
 
     public static void main(String[] args) throws IOException
     {
+        //Test file chunking
         String dir = System.getProperty("user.dir");
         System.out.println(dir);
         File testingChunk = new File("C:\\Users\\Miller Ridgeway\\Desktop\\Distributed Systems\\DistributedFileSystem\\src\\Sample.mp4");
-        Client.chunkFile(testingChunk);
+        //Client.chunkFile(testingChunk);
+
+        //Test merge together
+        System.out.println("Chunking complete!");
+        System.out.println("Now merging back together...");
+
+        List<File> chunks = new ArrayList<>();
+        for(int i = 1; i <= 17; i++){
+            String chunkNum = String.format("%03d", i);
+            chunks.add(new File("C:\\Users\\Miller Ridgeway\\Desktop\\Distributed Systems\\DistributedFileSystem\\src\\Sample.mp4." + chunkNum));
+        }
+
+        File dest = new File("Merged.mp4");
+        dest.createNewFile();
+        mergeChunks(chunks, dest);
+
+        System.out.println("Merge complete.");
 
 //        try
 //        {
