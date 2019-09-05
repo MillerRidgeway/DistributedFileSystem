@@ -1,10 +1,12 @@
-import java.io.*;
-import java.net.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ControllerClientHandler extends Thread {
+public class ControllerChunkHandler extends Thread {
     final DataInputStream input;
     final DataOutputStream output;
     final Socket connection;
@@ -12,9 +14,7 @@ public class ControllerClientHandler extends Thread {
     DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
     DateFormat fortime = new SimpleDateFormat("hh:mm:ss");
 
-
-
-    public ControllerClientHandler(Socket s, DataInputStream in, DataOutputStream out){
+    public ControllerChunkHandler(Socket s, DataInputStream in, DataOutputStream out){
         this.connection = s;
         this.input = in;
         this.output = out;
@@ -30,7 +30,7 @@ public class ControllerClientHandler extends Thread {
 
 
                 // Ask user what he wants
-                output.writeUTF("What do you want?[Date | Time | Send]..\n" +
+                output.writeUTF("What do you want?[Date | Time]..\n" +
                         "Type Exit to terminate connection.");
 
                 // receive the answer from client
@@ -50,6 +50,7 @@ public class ControllerClientHandler extends Thread {
                 // write on output stream based on the
                 // answer from the client
                 switch (received) {
+
                     case "Date":
                         toreturn = fordate.format(date);
                         output.writeUTF(toreturn);
@@ -59,10 +60,7 @@ public class ControllerClientHandler extends Thread {
                         toreturn = fortime.format(date);
                         output.writeUTF(toreturn);
                         break;
-                    case "Send":
-                        toreturn = Controller.getChunkServer().getHostAddress();
-                        output.writeUTF(toreturn);
-                        break;
+
                     default:
                         output.writeUTF("Invalid input");
                         break;

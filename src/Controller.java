@@ -1,41 +1,25 @@
+import javax.naming.ldap.Control;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 
 public class Controller {
+    public static ArrayList<Thread> currentConnections = new ArrayList<>();
 
-    //Enum for connection types to controller
-    public enum ConnectionType {
-        CHUNK(0), CLIENT(10);
-
-        private final int value;
-        private ConnectionType(int value) {
-            this.value = value;
+    public static InetAddress getChunkServer(){
+        //Do this based on available space within each chunk server - for now just give a chunk server
+        for(Thread t: currentConnections){
+            if(t instanceof ControllerChunkHandler) return ((ControllerChunkHandler) t).connection.getInetAddress();
         }
-
-        public int getValue() {
-            return value;
-        }
-
-        public static ConnectionType fromInteger(int x) {
-            switch(x) {
-                case 0:
-                    return CHUNK;
-                case 10:
-                    return CLIENT;
-            }
-            return null;
-        }
+        throw new NullPointerException("FATAL ERROR: No chunk servers found");
     }
     public static void main(String[] args) {
-
         //Host port
         final int PORT_NUMBER = 444;
 
         //Socket / Server
         ServerSocket listener;
         Socket connection;
-        ArrayList<Thread> currentConnections = new ArrayList<>();
 
         //Init server socket on PORT_NUMBER
         try{
@@ -52,21 +36,32 @@ public class Controller {
         //Bind to socket and spawn client handler
         while(true) {
             try{
-                connection = listener.accept();
 
+                connection = listener.accept();
                 System.out.println("New connection: " + connection);
 
                 //I/O Streams
                 DataInputStream input = new DataInputStream(connection.getInputStream());
                 DataOutputStream output = new DataOutputStream(connection.getOutputStream());
 
-                int id = input.readInt();
-                System.out.println("ID is: " + id);
+                //Determine thread type from first integer sent
+                int threadType = input.readInt();
+                System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType));
 
-                //New client handler
-                Thread t = new ControllerClientHandler(connection, input, output);
-                currentConnections.add(t);
-                t.start();
+                //New connection thread based on connection type
+                if(ConnectionType.fromInteger(threadType) == ConnectionType.CLIENT) {
+                    Thread clientThread = new ControllerClientHandler(connection, input, output);
+                    currentConnections.add(clientThread);
+                    clientThread.start();
+                    System.out.println(currentConnections.size());
+                }
+                else {
+                    Thread chunkThread = new ControllerChunkHandler(connection, input, output);
+                    currentConnections.add(chunkThread);
+                    chunkThread.start();
+                    System.out.println(currentConnections.size());
+                }
+
 
             }
             catch(Exception e){

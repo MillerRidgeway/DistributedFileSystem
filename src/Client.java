@@ -75,7 +75,7 @@ public class Client
             // getting localhost ip
             InetAddress ip = InetAddress.getByName("localhost");
 
-            // establish the connection with server port 5056
+            // establish the connection with server port 444
             Socket s = new Socket(ip, 444);
 
             // obtaining input and out streams
@@ -83,11 +83,11 @@ public class Client
             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
             //Send identification byte
-            dos.writeInt(Controller.ConnectionType.CLIENT.getValue());
-            System.out.println("Sent connect ID type: " + Controller.ConnectionType.CLIENT.getValue());
+            dos.writeInt(ConnectionType.CLIENT.getValue());
+            System.out.println("Sent connect ID type: " + ConnectionType.CLIENT.getValue());
 
             // the following loop performs the exchange of
-            // information between client and client handler
+            // information between client and Controller Client Handler class
             while (true)
             {
                 System.out.println(dis.readUTF());
