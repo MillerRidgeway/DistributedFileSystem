@@ -18,6 +18,9 @@ public class ChunkServer {
             DataInputStream dis = new DataInputStream(s.getInputStream());
             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
+            dos.writeInt(Controller.ConnectionType.CHUNK.getValue());
+            System.out.println("Sent connect ID type: " + Controller.ConnectionType.CHUNK.getValue());
+
             // the following loop performs the exchange of
             // information between client and client handler
             while (true) {

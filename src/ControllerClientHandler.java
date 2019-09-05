@@ -8,6 +8,7 @@ public class ControllerClientHandler extends Thread {
     final DataInputStream input;
     final DataOutputStream output;
     final Socket connection;
+    public int id;
 
     DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
     DateFormat fortime = new SimpleDateFormat("hh:mm:ss");
@@ -16,19 +17,17 @@ public class ControllerClientHandler extends Thread {
         this.connection = s;
         this.input = in;
         this.output = out;
+        this.id = -1;
     }
 
     @Override
     public void run() {
         String received;
         String toreturn;
-        int id;
-
-
 
         try {
-            id = input.readInt();
-            System.out.println("Id is: " + Controller.ConnectionType.fromInteger(id));
+//            this.id = input.readInt();
+//            System.out.print(" of type: " + Controller.ConnectionType.fromInteger(this.id));
 
             while (true) {
 

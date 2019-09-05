@@ -29,9 +29,8 @@ public class Controller {
     }
     public static void main(String[] args) {
 
-        //Config information
+        //Host port
         final int PORT_NUMBER = 444;
-        final String HOST = "127.0.0.1";
 
         //Socket / Server
         ServerSocket listener;
@@ -55,17 +54,19 @@ public class Controller {
             try{
                 connection = listener.accept();
 
-                System.out.println("New client connection: " + connection);
+                System.out.println("New connection: " + connection);
 
                 //I/O Streams
                 DataInputStream input = new DataInputStream(connection.getInputStream());
                 DataOutputStream output = new DataOutputStream(connection.getOutputStream());
 
+                int id = input.readInt();
+                System.out.println("ID is: " + id);
+
                 //New client handler
                 Thread t = new ControllerClientHandler(connection, input, output);
                 currentConnections.add(t);
                 t.start();
-
 
             }
             catch(Exception e){
