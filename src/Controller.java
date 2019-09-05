@@ -1,7 +1,32 @@
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
 
 public class Controller {
+
+    //Enum for connection types to controller
+    public enum ConnectionType {
+        CHUNK(0), CLIENT(10);
+
+        private final int value;
+        private ConnectionType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static ConnectionType fromInteger(int x) {
+            switch(x) {
+                case 0:
+                    return CHUNK;
+                case 10:
+                    return CLIENT;
+            }
+            return null;
+        }
+    }
     public static void main(String[] args) {
 
         //Config information
@@ -11,6 +36,7 @@ public class Controller {
         //Socket / Server
         ServerSocket listener;
         Socket connection;
+        ArrayList<Thread> currentConnections = new ArrayList<>();
 
         //Init server socket on PORT_NUMBER
         try{
@@ -37,6 +63,7 @@ public class Controller {
 
                 //New client handler
                 Thread t = new ControllerClientHandler(connection, input, output);
+                currentConnections.add(t);
                 t.start();
 
 

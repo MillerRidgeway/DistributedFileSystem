@@ -22,8 +22,16 @@ public class ControllerClientHandler extends Thread {
     public void run() {
         String received;
         String toreturn;
-        while (true) {
-            try {
+        int id;
+
+
+
+        try {
+            id = input.readInt();
+            System.out.println("Id is: " + Controller.ConnectionType.fromInteger(id));
+
+            while (true) {
+
 
                 // Ask user what he wants
                 output.writeUTF("What do you want?[Date | Time]..\n" +
@@ -61,9 +69,10 @@ public class ControllerClientHandler extends Thread {
                         output.writeUTF("Invalid input");
                         break;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

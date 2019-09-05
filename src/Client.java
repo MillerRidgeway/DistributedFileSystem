@@ -46,71 +46,75 @@ public class Client
 
     public static void main(String[] args) throws IOException
     {
-        //Test file chunking
-        String dir = System.getProperty("user.dir");
-        System.out.println(dir);
-        File testingChunk = new File("C:\\Users\\Miller Ridgeway\\Desktop\\Distributed Systems\\DistributedFileSystem\\src\\Sample.mp4");
-        //Client.chunkFile(testingChunk);
-
-        //Test merge together
-        System.out.println("Chunking complete!");
-        System.out.println("Now merging back together...");
-
-        List<File> chunks = new ArrayList<>();
-        for(int i = 1; i <= 17; i++){
-            String chunkNum = String.format("%03d", i);
-            chunks.add(new File("C:\\Users\\Miller Ridgeway\\Desktop\\Distributed Systems\\DistributedFileSystem\\src\\Sample.mp4." + chunkNum));
-        }
-
-        File dest = new File("Merged.mp4");
-        dest.createNewFile();
-        mergeChunks(chunks, dest);
-
-        System.out.println("Merge complete.");
-
-//        try
-//        {
-//            Scanner scn = new Scanner(System.in);
+//        //Test file chunking
+//        String dir = System.getProperty("user.dir");
+//        System.out.println(dir);
+//        File testingChunk = new File("C:\\Users\\Miller Ridgeway\\Desktop\\Distributed Systems\\DistributedFileSystem\\src\\Sample.mp4");
+//        Client.chunkFile(testingChunk);
 //
-//            // getting localhost ip
-//            InetAddress ip = InetAddress.getByName("localhost");
+//        //Test merge together
+//        System.out.println("Chunking complete!");
+//        System.out.println("Now merging back together...");
 //
-//            // establish the connection with server port 5056
-//            Socket s = new Socket(ip, 444);
-//
-//            // obtaining input and out streams
-//            DataInputStream dis = new DataInputStream(s.getInputStream());
-//            DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-//
-//            // the following loop performs the exchange of
-//            // information between client and client handler
-//            while (true)
-//            {
-//                System.out.println(dis.readUTF());
-//                String tosend = scn.nextLine();
-//                dos.writeUTF(tosend);
-//
-//                // If client sends exit,close this connection
-//                // and then break from the while loop
-//                if(tosend.equals("Exit"))
-//                {
-//                    System.out.println("Closing this connection : " + s);
-//                    s.close();
-//                    System.out.println("Connection closed");
-//                    break;
-//                }
-//
-//                // printing date or time as requested by client
-//                String received = dis.readUTF();
-//                System.out.println(received);
-//            }
-//
-//            // closing resources
-//            scn.close();
-//            dis.close();
-//            dos.close();
-//        }catch(Exception e){
-//            e.printStackTrace();
+//        List<File> chunks = new ArrayList<>();
+//        for(int i = 1; i <= 82; i++){
+//            String chunkNum = String.format("%03d", i);
+//            chunks.add(new File("C:\\Users\\Miller Ridgeway\\Desktop\\Distributed Systems\\DistributedFileSystem\\src\\Sample.mp4." + chunkNum));
 //        }
+//
+//        File dest = new File("Merged.mp4");
+//        dest.createNewFile();
+//        mergeChunks(chunks, dest);
+//
+//        System.out.println("Merge complete.");
+
+        try
+        {
+            Scanner scn = new Scanner(System.in);
+
+            // getting localhost ip
+            InetAddress ip = InetAddress.getByName("localhost");
+
+            // establish the connection with server port 5056
+            Socket s = new Socket(ip, 444);
+
+            // obtaining input and out streams
+            DataInputStream dis = new DataInputStream(s.getInputStream());
+            DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+
+            //Send identification byte
+            dos.writeInt(Controller.ConnectionType.CLIENT.getValue());
+            System.out.println("Sent connect ID type: " + Controller.ConnectionType.CLIENT.getValue());
+
+            // the following loop performs the exchange of
+            // information between client and client handler
+            while (true)
+            {
+                System.out.println(dis.readUTF());
+                String tosend = scn.nextLine();
+                dos.writeUTF(tosend);
+
+                // If client sends exit,close this connection
+                // and then break from the while loop
+                if(tosend.equals("Exit"))
+                {
+                    System.out.println("Closing this connection : " + s);
+                    s.close();
+                    System.out.println("Connection closed");
+                    break;
+                }
+
+                // printing date or time as requested by client
+                String received = dis.readUTF();
+                System.out.println(received);
+            }
+
+            // closing resources
+            scn.close();
+            dis.close();
+            dos.close();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 } 
