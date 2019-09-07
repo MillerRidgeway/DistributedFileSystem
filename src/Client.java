@@ -1,3 +1,5 @@
+import sun.plugin2.message.Message;
+
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
@@ -84,7 +86,7 @@ public class Client
 
             //Send identification byte
             dos.writeInt(ConnectionType.CLIENT.getValue());
-            System.out.println("Sent connect ID type: " + ConnectionType.CLIENT.getValue());
+            System.out.println("Sent connect ID type: " + ConnectionType.CLIENT);
 
             // the following loop performs the exchange of
             // information between client and Controller Client Handler class
@@ -104,10 +106,14 @@ public class Client
                     break;
                 }
 
-                //Print recieved command
+                //Print & process received data
                 String received = dis.readUTF();
-                System.out.println(received);
+                System.out.println("The message received was: " + received);
 
+                MessageParser parser = new MessageParser(received);
+                System.out.println("Parsed KV string: " + parser.getParsedKV());
+                System.out.println("Parsed Key: " + parser.getKey());
+                System.out.println("Parsed Value: "+ parser.getValue());
 
             }
 
