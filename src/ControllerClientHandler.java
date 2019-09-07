@@ -63,7 +63,7 @@ public class ControllerClientHandler extends Thread {
                         break;
                     case "Send":
                         payload.put("sendTo", Controller.getChunkServer().getHostAddress());
-                        toreturn = "{sendTo: " + payload.get("sendTo") + "}";
+                        toreturn = "{sendTo:" + payload.get("sendTo") + "}";
                         output.writeUTF(toreturn);
                         break;
                     default:

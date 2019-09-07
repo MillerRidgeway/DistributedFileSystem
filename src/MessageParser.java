@@ -9,8 +9,8 @@ public class MessageParser {
         }
 
         String trimmedInput = toBeParsed.replace("{","");
-        trimmedInput.replace("}","");
-        trimmedInput.trim();
+        trimmedInput = trimmedInput.replace("}","");
+        trimmedInput = trimmedInput.trim();
 
         String [] kv = trimmedInput.split(":");
 

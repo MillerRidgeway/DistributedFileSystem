@@ -108,12 +108,20 @@ public class Client
 
                 //Print & process received data
                 String received = dis.readUTF();
-                System.out.println("The message received was: " + received);
+                System.out.println("The message received was:" + received);
 
+                //Print the parsed message
                 MessageParser parser = new MessageParser(received);
                 System.out.println("Parsed KV string: " + parser.getParsedKV());
                 System.out.println("Parsed Key: " + parser.getKey());
                 System.out.println("Parsed Value: "+ parser.getValue());
+                System.out.println("");
+
+                switch(parser.getKey()){
+                    case "sendTo":
+                        System.out.println("sendTo received");
+                }
+
 
             }
 
