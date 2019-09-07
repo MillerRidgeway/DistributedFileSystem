@@ -104,9 +104,11 @@ public class Client
                     break;
                 }
 
-                // printing date or time as requested by client
+                //Print recieved command
                 String received = dis.readUTF();
                 System.out.println(received);
+
+
             }
 
             // closing resources

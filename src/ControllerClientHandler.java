@@ -3,6 +3,8 @@ import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ControllerClientHandler extends Thread {
     final DataInputStream input;
@@ -12,7 +14,7 @@ public class ControllerClientHandler extends Thread {
     DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
     DateFormat fortime = new SimpleDateFormat("hh:mm:ss");
 
-
+    Map<String, String> payload = new HashMap<>();
 
     public ControllerClientHandler(Socket s, DataInputStream in, DataOutputStream out){
         this.connection = s;
@@ -60,7 +62,8 @@ public class ControllerClientHandler extends Thread {
                         output.writeUTF(toreturn);
                         break;
                     case "Send":
-                        toreturn = Controller.getChunkServer().getHostAddress();
+                        payload.put("sendTo", Controller.getChunkServer().getHostAddress());
+                        toreturn = "{sendTo: " + payload.get("sendTo") + "}";
                         output.writeUTF(toreturn);
                         break;
                     default:
