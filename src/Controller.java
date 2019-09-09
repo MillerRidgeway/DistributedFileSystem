@@ -46,9 +46,10 @@ public class Controller {
 
                 //Determine thread type from first integer sent
                 int threadType = input.readInt();
-                System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType));
+                System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType) + "\n");
 
                 //New connection thread based on connection type
+                //Only two cases, client connection or new chunk server
                 if(ConnectionType.fromInteger(threadType) == ConnectionType.CLIENT) {
                     Thread clientThread = new ControllerClientHandler(connection, input, output);
                     currentConnections.add(clientThread);

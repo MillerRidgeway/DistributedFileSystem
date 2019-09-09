@@ -1,19 +1,17 @@
-import sun.plugin2.message.Message;
-
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.Map;
 
 // Client class 
 public class Client
 {
     //-----FILE CHUNKING----------------------------------
     //Split a given file into 64KB chunks
-    public static void chunkFile(File f) throws IOException {
+    public static int chunkFile(File f) throws IOException {
         int chunkCount = 1;
         int fileSize = 64000;
 
@@ -35,6 +33,8 @@ public class Client
                 }
             }
         }
+
+        return chunkCount - 1;
     }
 
     public static void mergeChunks(List<File> files, File dest) throws IOException {
@@ -84,33 +84,47 @@ public class Client
             DataInputStream dis = new DataInputStream(s.getInputStream());
             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
+            Map<String,String> payload = new HashMap<>();
+
             //Send identification byte
             dos.writeInt(ConnectionType.CLIENT.getValue());
-            System.out.println("Sent connect ID type: " + ConnectionType.CLIENT);
+            System.out.println("Sent connect ID type: " + ConnectionType.CLIENT + "\n");
 
             // the following loop performs the exchange of
             // information between client and Controller Client Handler class
-            while (true)
+            net_recv: while (true)
             {
                 System.out.println(dis.readUTF());
                 String tosend = scn.nextLine();
-                dos.writeUTF(tosend);
 
                 // If client sends exit,close this connection
                 // and then break from the while loop
-                if(tosend.equals("Exit"))
-                {
-                    System.out.println("Closing this connection : " + s);
-                    s.close();
-                    System.out.println("Connection closed");
-                    break;
+                switch(tosend){
+                    case "Exit":
+                        System.out.println("Closing this connection : " + s);
+                        s.close();
+                        System.out.println("Connection closed");
+                        break net_recv;
+
+                    case "Send":
+                        System.out.println("Please input filename to send: ");
+                        tosend = scn.nextLine();
+
+                        File fileToSend = new File(tosend);
+                        int chunks = Client.chunkFile(fileToSend);
+                        payload.put("send", Integer.toString(chunks));
+                        tosend = MessageParser.mapToString("send", payload);
+
+                        dos.writeUTF(tosend);
+                        break;
                 }
+
 
                 //Print & process received data
                 String received = dis.readUTF();
                 System.out.println("The message received was:" + received);
 
-                //Print the parsed message
+                //Create and print the parsed message
                 MessageParser parser = new MessageParser(received);
                 System.out.println("Parsed KV string: " + parser.getParsedKV());
                 System.out.println("Parsed Key: " + parser.getKey());
@@ -121,8 +135,6 @@ public class Client
                     case "sendTo":
                         System.out.println("sendTo received");
                 }
-
-
             }
 
             // closing resources

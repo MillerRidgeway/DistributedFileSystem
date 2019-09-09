@@ -32,7 +32,7 @@ public class ControllerClientHandler extends Thread {
 
 
                 // Ask user what he wants
-                output.writeUTF("What do you want?[Date | Time | Send]..\n" +
+                output.writeUTF("What do you want? [Send]..\n" +
                         "Type Exit to terminate connection.");
 
                 // receive the answer from client
@@ -46,24 +46,22 @@ public class ControllerClientHandler extends Thread {
                     break;
                 }
 
-                // creating Date object
-                Date date = new Date();
-
                 // write on output stream based on the
                 // answer from the client
-                switch (received) {
-                    case "Date":
-                        toreturn = fordate.format(date);
-                        output.writeUTF(toreturn);
-                        break;
+                //Create and print the parsed message
+                MessageParser parser = new MessageParser(received);
+                System.out.println("Parsed KV string: " + parser.getParsedKV());
+                System.out.println("Parsed Key: " + parser.getKey());
+                System.out.println("Parsed Value: "+ parser.getValue());
+                System.out.println("");
 
-                    case "Time":
-                        toreturn = fortime.format(date);
-                        output.writeUTF(toreturn);
-                        break;
-                    case "Send":
+
+
+                switch (parser.getKey()) {
+                    case "send":
+                        System.out.println("Replying with sendTo");
                         payload.put("sendTo", Controller.getChunkServer().getHostAddress());
-                        toreturn = "{sendTo:" + payload.get("sendTo") + "}";
+                        toreturn = MessageParser.mapToString("sendTo",payload);
                         output.writeUTF(toreturn);
                         break;
                     default:
