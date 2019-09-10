@@ -117,6 +117,13 @@ public class Client
 
                         dos.writeUTF(tosend);
                         break;
+
+                    default:
+                        System.out.println("Unrecognized command " + tosend);
+                        System.out.println("The server will now close the connection");
+
+                        dos.writeUTF(tosend);
+                        break;
                 }
 
 
