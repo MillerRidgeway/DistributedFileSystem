@@ -60,6 +60,7 @@ public class ControllerClientHandler extends Thread {
 
                         int chunkServCount = Controller.currentChunkConnections.size();
                         int fileChunkCount = Integer.parseInt(parser.getValue());
+                        
                         Map<String, String []> sendToIndex = new HashMap<>();
                         for(int i = 0; i < fileChunkCount; i++){
                             Controller.currentChunkConnections.get(i % chunkServCount);
