@@ -1,53 +1,60 @@
 import java.net.*;
-import java.util.Scanner;
 import java.io.*;
-
+import java.util.ArrayList;
 
 public class ChunkServer {
+
     public static void main(String[] args) {
+        //Start ChunkServerClient connection to controller - manages heartbeats
+        //controller interactions, etc.
         try {
-            Scanner scn = new Scanner(System.in);
-
-            // getting localhost ip
             InetAddress ip = InetAddress.getByName("localhost");
+            Socket controllerSocket = new Socket(ip, 444);
+            ChunkServerClient controllerConnection = new ChunkServerClient(controllerSocket);
+            controllerConnection.start();
+        }
+        catch(Exception e){
+            System.out.println("Error connecting chunk client to controller server: "+ e);
+        }
 
-            // establish the connection with server port 5056
-            Socket s = new Socket(ip, 444);
+        //Host port
+        final int PORT_NUMBER = 555;
 
-            // obtaining input and out streams
-            DataInputStream dis = new DataInputStream(s.getInputStream());
-            DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+        //Socket / Server
+        ServerSocket listener;
+        Socket connection;
 
-            dos.writeInt(ConnectionType.CHUNK.getValue());
-            System.out.println("Sent connect ID type: " + ConnectionType.CHUNK.getValue());
+        //Init server socket on PORT_NUMBER
+        try{
+            listener = new ServerSocket(PORT_NUMBER);
+            System.out.println("Listening on port: " + PORT_NUMBER);
+        }
+        catch(Exception e)
+        {
+            System.out.println("ERROR: Unexpected chunk server shutdown");
+            System.out.println("Error is: " + e);
+            return;
+        }
 
-            // the following loop performs the exchange of
-            // information between client and client handler
-            while (true) {
-                System.out.println(dis.readUTF());
-                String tosend = scn.nextLine();
-                dos.writeUTF(tosend);
+        //Bind to socket and spawn new chunk server client
+        while(true) {
+            try {
+                connection = listener.accept();
+                System.out.println("New connection: " + connection);
 
-                // If client sends exit,close this connection
-                // and then break from the while loop
-                if (tosend.equals("Exit")) {
-                    System.out.println("Closing this connection : " + s);
-                    s.close();
-                    System.out.println("Connection closed");
-                    break;
-                }
+                //I/O Streams
+                DataInputStream input = new DataInputStream(connection.getInputStream());
+                DataOutputStream output = new DataOutputStream(connection.getOutputStream());
 
-                // printing date or time as requested by client
-                String received = dis.readUTF();
-                System.out.println(received);
+                //Determine connection type from first integer sent
+                int threadType = input.readInt();
+                System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType) +"\n");
             }
 
-            // closing resources
-            scn.close();
-            dis.close();
-            dos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            catch(Exception e){
+                System.out.println("Error in binding / writing");
+                System.out.println("Error is: " + e);
+            }
         }
     }
 }

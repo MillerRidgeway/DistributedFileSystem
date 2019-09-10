@@ -77,8 +77,8 @@ public class Client
             // getting localhost ip
             InetAddress ip = InetAddress.getByName("localhost");
 
-            // establish the connection with server port 444
-            Socket s = new Socket(ip, 444);
+            // establish the connection to the controller with server port 444
+            Socket s = new Socket(ip, 555);
 
             // obtaining input and out streams
             DataInputStream dis = new DataInputStream(s.getInputStream());

@@ -29,10 +29,8 @@ public class ControllerClientHandler extends Thread {
 
         try {
             while (true) {
-
-
                 // Ask user what he wants
-                output.writeUTF("What do you want? [Send]..\n" +
+                output.writeUTF("What do you want? [Send | Exit]..\n" +
                         "Type Exit to terminate connection.");
 
                 // receive the answer from client
@@ -80,5 +78,4 @@ public class ControllerClientHandler extends Thread {
             e.printStackTrace();
         }
     }
-
 }
