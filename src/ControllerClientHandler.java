@@ -52,15 +52,6 @@ public class ControllerClientHandler extends Thread {
                 switch (parser.getKey()) {
                     case "send":
                         System.out.println("Replying with sendTo");
-
-                        int chunkServCount = Controller.currentChunkConnections.size();
-                        int fileChunkCount = Integer.parseInt(parser.getValue());
-
-                        Map<String, String[]> sendToIndex = new HashMap<>();
-                        for (int i = 0; i < fileChunkCount; i++) {
-                            Controller.currentChunkConnections.get(i % chunkServCount);
-                        }
-
                         payload.put("sendTo", Controller.getChunkServer().getHostAddress());
                         toreturn = MessageParser.mapToString("sendTo", payload);
                         output.writeUTF(toreturn);

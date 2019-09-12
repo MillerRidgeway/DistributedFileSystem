@@ -138,7 +138,7 @@ public class Client {
                 switch (parser.getKey()) {
                     case "sendTo":
                         System.out.println("Sending to: " + parser.getValue());
-                        for (int i = 0; i < 1; i++) {
+                        for (int i = 0; i < chunks; i++) {
                             if (chunks == -1)
                                 System.out.println("Error in chunking the file - chunks =-1");
                             else {
