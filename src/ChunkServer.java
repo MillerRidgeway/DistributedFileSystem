@@ -49,6 +49,11 @@ public class ChunkServer {
                 //Determine connection type from first integer sent
                 int threadType = input.readInt();
                 System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType) +"\n");
+
+                switch(ConnectionType.fromInteger(threadType)){
+                    case CLIENT_SEND:
+                        ChunkServerRecv t = new ChunkServerRecv(connection, input, output);
+                }
             }
 
             catch(Exception e){

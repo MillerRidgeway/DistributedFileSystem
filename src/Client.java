@@ -140,7 +140,8 @@ public class Client
 
                 switch(parser.getKey()){
                     case "sendTo":
-                        System.out.println("sendTo received");
+                        System.out.println("Sending to: " + parser.getKey());
+
                 }
             }
 

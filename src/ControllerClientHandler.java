@@ -11,9 +11,6 @@ public class ControllerClientHandler extends Thread {
     final DataOutputStream output;
     final Socket connection;
 
-    DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
-    DateFormat fortime = new SimpleDateFormat("hh:mm:ss");
-
     Map<String, String> payload = new HashMap<>();
 
     public ControllerClientHandler(Socket s, DataInputStream in, DataOutputStream out){

@@ -1,5 +1,5 @@
 public enum ConnectionType {
-    CHUNK(100), CLIENT(200);
+    CHUNK(100), CLIENT(200), CLIENT_SEND(1000), CHUNK_SEND(2000);
 
     private final int value;
     private ConnectionType(int value) {
