@@ -7,29 +7,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 // Client class 
-public class Client
-{
+public class Client {
     //-----FILE CHUNKING----------------------------------
     //Split a given file into 64KB chunks
     public static int chunkFile(File f) throws IOException {
         int chunkCount = 1;
         int fileSize = 64000;
 
-        byte [] buffer = new byte[fileSize];
+        byte[] buffer = new byte[fileSize];
 
         String fName = f.getName();
 
-        try (FileInputStream fis = new FileInputStream(f)){
-            BufferedInputStream  bis = new BufferedInputStream(fis);
+        try (FileInputStream fis = new FileInputStream(f)) {
+            BufferedInputStream bis = new BufferedInputStream(fis);
 
             //Init to 0, assign in while
             int bytesRemain = 0;
-            while((bytesRemain = bis.read(buffer)) > 0){
+            while ((bytesRemain = bis.read(buffer)) > 0) {
                 String chunkFileName = String.format("%s.%03d", fName, chunkCount++);
                 File newFile = new File(f.getParent(), chunkFileName);
 
-                try(FileOutputStream out = new FileOutputStream(newFile)){
-                    out.write(buffer,0,bytesRemain);
+                try (FileOutputStream out = new FileOutputStream(newFile)) {
+                    out.write(buffer, 0, bytesRemain);
                 }
             }
         }
@@ -46,8 +45,7 @@ public class Client
         }
     }
 
-    public static void main(String[] args) throws IOException
-    {
+    public static void main(String[] args) throws IOException {
 //        //Test file chunking
 //        String dir = System.getProperty("user.dir");
 //        System.out.println(dir);
@@ -70,8 +68,7 @@ public class Client
 //
 //        System.out.println("Merge complete.");
 
-        try
-        {
+        try {
             Scanner scn = new Scanner(System.in);
 
             // getting localhost ip
@@ -84,8 +81,9 @@ public class Client
             DataInputStream dis = new DataInputStream(s.getInputStream());
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
 
-            Map<String,String> payload = new HashMap<>();
+            Map<String, String> payload = new HashMap<>();
             int chunks = -1;
+            File fileToSend = null;
 
             //Send identification byte
             out.writeInt(ConnectionType.CLIENT.getValue());
@@ -93,13 +91,13 @@ public class Client
 
             // the following loop performs the exchange of
             // information between client and Controller Client Handler class
-            net_recv: while (true)
-            {
+            net_recv:
+            while (true) {
                 System.out.println(dis.readUTF());
                 String tosend = scn.nextLine();
 
                 //Parse the command and then take the appropriate action
-                switch(tosend){
+                switch (tosend) {
                     case "Exit":
                         System.out.println("Closing this connection : " + s);
                         s.close();
@@ -110,7 +108,7 @@ public class Client
                         System.out.println("Please input filename to send: ");
                         tosend = scn.nextLine();
 
-                        File fileToSend = new File(tosend);
+                        fileToSend = new File(tosend);
                         chunks = Client.chunkFile(fileToSend);
                         payload.put("send", Integer.toString(chunks));
                         tosend = MessageParser.mapToString("send", payload);
@@ -126,7 +124,6 @@ public class Client
                         break;
                 }
 
-
                 //Print & process received data
                 String received = dis.readUTF();
                 System.out.println("The message received was:" + received);
@@ -135,13 +132,13 @@ public class Client
                 MessageParser parser = new MessageParser(received);
                 System.out.println("Parsed KV string: " + parser.getParsedKV());
                 System.out.println("Parsed Key: " + parser.getKey());
-                System.out.println("Parsed Value: "+ parser.getValue());
+                System.out.println("Parsed Value: " + parser.getValue());
                 System.out.println("");
 
-                switch(parser.getKey()){
+                switch (parser.getKey()) {
                     case "sendTo":
                         System.out.println("Sending to: " + parser.getValue());
-                        for(int i = 0; i < 1; i++) {
+                        for (int i = 0; i < 1; i++) {
                             if (chunks == -1)
                                 System.out.println("Error in chunking the file - chunks =-1");
                             else {
@@ -150,12 +147,23 @@ public class Client
                                 DataInputStream disUpload = new DataInputStream(sUpload.getInputStream());
                                 DataOutputStream outUpload = new DataOutputStream(sUpload.getOutputStream());
 
+                                //Init connect and file metadeta
                                 outUpload.writeInt(ConnectionType.CLIENT_SEND.getValue());
-                                outUpload.writeUTF("Testing secondary socket in client");
 
+                                //Send fileName to ChunkServerRecv
+                                String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
+                                outUpload.writeUTF(fileChunkName);
+
+                                long fileSize = fileToSend.length();
+                                FileOutputStream fos = new FileOutputStream(fileChunkName);
+                                byte[] buf = new byte[64000];
+
+                                fos.write(buf, 0, 64000);
+                                fos.close();
+
+                                outUpload.write(buf, 0, 64000);
                                 disUpload.close();
                                 outUpload.close();
-
                             }
                         }
                 }
@@ -165,7 +173,7 @@ public class Client
             scn.close();
             dis.close();
             out.close();
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

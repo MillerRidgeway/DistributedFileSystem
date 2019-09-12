@@ -13,7 +13,7 @@ public class ControllerClientHandler extends Thread {
 
     Map<String, String> payload = new HashMap<>();
 
-    public ControllerClientHandler(Socket s, DataInputStream in, DataOutputStream out){
+    public ControllerClientHandler(Socket s, DataInputStream in, DataOutputStream out) {
         this.connection = s;
         this.input = in;
         this.output = out;
@@ -47,7 +47,7 @@ public class ControllerClientHandler extends Thread {
                 MessageParser parser = new MessageParser(received);
                 System.out.println("Parsed KV string: " + parser.getParsedKV());
                 System.out.println("Parsed Key: " + parser.getKey());
-                System.out.println("Parsed Value: "+ parser.getValue());
+                System.out.println("Parsed Value: " + parser.getValue());
 
                 switch (parser.getKey()) {
                     case "send":
@@ -55,14 +55,14 @@ public class ControllerClientHandler extends Thread {
 
                         int chunkServCount = Controller.currentChunkConnections.size();
                         int fileChunkCount = Integer.parseInt(parser.getValue());
-                        
-                        Map<String, String []> sendToIndex = new HashMap<>();
-                        for(int i = 0; i < fileChunkCount; i++){
+
+                        Map<String, String[]> sendToIndex = new HashMap<>();
+                        for (int i = 0; i < fileChunkCount; i++) {
                             Controller.currentChunkConnections.get(i % chunkServCount);
                         }
 
                         payload.put("sendTo", Controller.getChunkServer().getHostAddress());
-                        toreturn = MessageParser.mapToString("sendTo",payload);
+                        toreturn = MessageParser.mapToString("sendTo", payload);
                         output.writeUTF(toreturn);
                         break;
                     default:
@@ -70,8 +70,7 @@ public class ControllerClientHandler extends Thread {
                         break;
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

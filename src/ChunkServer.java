@@ -58,7 +58,6 @@ public class ChunkServer {
                     case CLIENT_SEND:
                         ChunkServerRecv t = new ChunkServerRecv(connection, input, output);
                         t.start();
-                        System.out.println("New client is sending file");
                         break;
                 }
             }

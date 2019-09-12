@@ -14,7 +14,7 @@ public class ControllerChunkHandler extends Thread {
     DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
     DateFormat fortime = new SimpleDateFormat("hh:mm:ss");
 
-    public ControllerChunkHandler(Socket s, DataInputStream in, DataOutputStream out){
+    public ControllerChunkHandler(Socket s, DataInputStream in, DataOutputStream out) {
         this.connection = s;
         this.input = in;
         this.output = out;
@@ -66,8 +66,7 @@ public class ControllerChunkHandler extends Thread {
                         break;
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
