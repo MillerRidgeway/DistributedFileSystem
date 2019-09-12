@@ -4,9 +4,14 @@ import java.io.*;
 
 
 public class ChunkServerClient extends Thread {
-    Socket s;
-    public ChunkServerClient(Socket s){
+    final Socket s;
+    final DataInputStream dis;
+    final DataOutputStream out;
+
+    public ChunkServerClient(Socket s, DataInputStream dis, DataOutputStream out){
         this.s = s;
+        this.dis = dis;
+        this.out = out;
     }
 
     @Override
@@ -14,11 +19,7 @@ public class ChunkServerClient extends Thread {
         try {
             Scanner scn = new Scanner(System.in);
 
-            // obtaining input and out streams
-            DataInputStream dis = new DataInputStream(s.getInputStream());
-            DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-
-            dos.writeInt(ConnectionType.CHUNK.getValue());
+            out.writeInt(ConnectionType.CHUNK.getValue());
             System.out.println("Sent connect ID type: " + ConnectionType.CHUNK.getValue());
 
             // the following loop performs the exchange of
@@ -26,7 +27,7 @@ public class ChunkServerClient extends Thread {
             while (true) {
                 System.out.println(dis.readUTF());
                 String tosend = scn.nextLine();
-                dos.writeUTF(tosend);
+                out.writeUTF(tosend);
 
                 // If client sends exit,close this connection
                 // and then break from the while loop
@@ -45,7 +46,7 @@ public class ChunkServerClient extends Thread {
             // closing resources
             scn.close();
             dis.close();
-            dos.close();
+            out.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

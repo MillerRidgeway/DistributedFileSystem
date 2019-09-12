@@ -10,7 +10,11 @@ public class ChunkServer {
         try {
             InetAddress ip = InetAddress.getByName("localhost");
             Socket controllerSocket = new Socket(ip, 444);
-            ChunkServerClient controllerConnection = new ChunkServerClient(controllerSocket);
+            DataInputStream dis = new DataInputStream(controllerSocket.getInputStream());
+            DataOutputStream out = new DataOutputStream(controllerSocket.getOutputStream());
+
+
+            ChunkServerClient controllerConnection = new ChunkServerClient(controllerSocket, dis, out);
             controllerConnection.start();
         }
         catch(Exception e){
@@ -53,11 +57,14 @@ public class ChunkServer {
                 switch(ConnectionType.fromInteger(threadType)){
                     case CLIENT_SEND:
                         ChunkServerRecv t = new ChunkServerRecv(connection, input, output);
+                        t.start();
+                        System.out.println("New client is sending file");
+                        break;
                 }
             }
 
             catch(Exception e){
-                System.out.println("Error in binding / writing");
+                System.out.println("Error in binding / writing to chunk server socket");
                 System.out.println("Error is: " + e);
             }
         }
