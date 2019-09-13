@@ -43,25 +43,25 @@ public class Client {
     }
 
     public static void main(String[] args) throws IOException {
-        //Test file chunking
-        String dir = System.getProperty("user.dir");
-        System.out.println(dir);
-        File testingChunk = new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf");
-        int numChunks = Client.chunkFile(testingChunk);
-
-        //Test merge together
-        System.out.println("Chunking complete!");
-        System.out.println("Now merging back together...");
-
-        List<File> chunkFiles = new ArrayList<>();
-        for(int i = 1; i <= numChunks; i++){
-            String chunkNum = String.format("%03d", i);
-            chunkFiles.add(new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf." + chunkNum));
-        }
-
-        File dest = new File("Merged.pdf");
-        dest.createNewFile();
-        mergeChunks(chunkFiles, dest);
+//        //Test file chunking
+//        String dir = System.getProperty("user.dir");
+//        System.out.println(dir);
+//        File testingChunk = new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf");
+//        int numChunks = Client.chunkFile(testingChunk);
+//
+//        //Test merge together
+//        System.out.println("Chunking complete!");
+//        System.out.println("Now merging back together...");
+//
+//        List<File> chunkFiles = new ArrayList<>();
+//        for (int i = 1; i <= numChunks; i++) {
+//            String chunkNum = String.format("%03d", i);
+//            chunkFiles.add(new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf." + chunkNum));
+//        }
+//
+//        File dest = new File("Merged.pdf");
+//        dest.createNewFile();
+//        mergeChunks(chunkFiles, dest);
 
         System.out.println("Merge complete.");
 
@@ -134,8 +134,8 @@ public class Client {
 
                 switch (parser.getKey()) {
                     case "sendTo":
-                        System.out.println("Sending "+ chunks +" chunks to the following: " + parser.getValue());
-                        String [] servers = parser.getValue().split(",");
+                        System.out.println("Sending " + chunks + " chunks to the following: " + parser.getValue());
+                        String[] servers = parser.getValue().split(",");
                         for (int i = 0; i < chunks; i++) {
                             if (chunks == -1)
                                 System.out.println("Error in chunking the file - chunks =-1");
@@ -152,15 +152,16 @@ public class Client {
                                 String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
                                 outUpload.writeUTF(fileChunkName);
 
-                                //Send the full chunk (64kb always) to the chunk server
-                                long fileSize = fileToSend.length();
+                                //Send a chunk to the chunk server
+                                File chunk = new File(fileChunkName);
+                                long fileSize = chunk.length();
                                 FileOutputStream fos = new FileOutputStream(fileChunkName);
-                                byte[] buf = new byte[64000];
+                                byte[] buf = new byte[(int) fileSize];
 
-                                fos.write(buf, 0, 64000);
+                                fos.write(buf, 0, (int) (fileSize));
                                 fos.close();
 
-                                outUpload.write(buf, 0, 64000);
+                                outUpload.write(buf, 0, (int)fileSize);
                                 disUpload.close();
                                 outUpload.close();
                             }

@@ -20,11 +20,12 @@ public class ChunkServerRecv extends Thread {
             System.out.println("Uploading: " + filename);
 
             //Get file from client
+            int count;
             byte[] buf = new byte[64000];
-            dis.read(buf);
-
             FileOutputStream fos = new FileOutputStream("C:\\Users\\Miller Ridgeway\\Desktop\\" + filename);
-            fos.write(buf);
+            while((count = dis.read(buf)) > 0){
+                fos.write(buf, 0, count);
+            }
 
             System.out.println("Upload complete: " + filename);
 
