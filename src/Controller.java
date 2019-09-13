@@ -3,14 +3,14 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class Controller {
-    public static ArrayList<Thread> currentChunkConnections = new ArrayList<>();
+    public static ArrayList<InetAddress> currentChunkConnections = new ArrayList<>();
 
-    public static InetAddress getChunkServer(){
+    public static InetAddress getChunkServer() throws UnknownHostException{
         //Do this based on available space within each chunk server - for now just give a chunk server
-        for(Thread t: currentChunkConnections){
-            if(t instanceof ControllerChunkHandler) return ((ControllerChunkHandler) t).connection.getInetAddress();
-        }
-        throw new NullPointerException("FATAL ERROR: No chunk servers found");
+//        for(Thread t: currentChunkConnections){
+//            if(t instanceof ControllerChunkHandler) return ((ControllerChunkHandler) t).connection.getInetAddress();
+//        }
+        return currentChunkConnections.get(0);
     }
 
     public static void main(String[] args) {
@@ -56,13 +56,14 @@ public class Controller {
                         clientThread.start();
                         break;
                     case CHUNK:
-                        Thread chunkThread = new ControllerChunkHandler(connection, input, output);
-                        currentChunkConnections.add(chunkThread);
+                        ControllerChunkHandler chunkThread = new ControllerChunkHandler(connection, input, output);
+                        currentChunkConnections.add(chunkThread.connection.getInetAddress());
                         chunkThread.start();
                         System.out.println("Chunk servers connected: " + currentChunkConnections.size() + "\n");
                         break;
                     default:
                         System.out.println("Unrecognized connection attempt...ignoring");
+                        break;
 
                 }
             }

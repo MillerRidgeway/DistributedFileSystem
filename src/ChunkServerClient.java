@@ -20,7 +20,7 @@ public class ChunkServerClient extends Thread {
             Scanner scn = new Scanner(System.in);
 
             out.writeInt(ConnectionType.CHUNK.getValue());
-            System.out.println("Sent connect ID type: " + ConnectionType.CHUNK.getValue());
+            System.out.println("Sent connect ID type: " + ConnectionType.CHUNK);
 
             // the following loop performs the exchange of
             // information between client and client handler

@@ -52,7 +52,15 @@ public class ControllerClientHandler extends Thread {
                 switch (parser.getKey()) {
                     case "send":
                         System.out.println("Replying with sendTo");
-                        payload.put("sendTo", Controller.getChunkServer().getHostAddress());
+                        String chunkServList = "";
+                        for(int i = 0; i < Integer.parseInt(parser.getValue()); i++)
+                        {
+                            if(i == Integer.parseInt(parser.getValue()) - 1)
+                                chunkServList += Controller.getChunkServer().getHostAddress();
+                            else
+                                chunkServList += Controller.getChunkServer().getHostAddress() + ",";
+                        }
+                        payload.put("sendTo", chunkServList);
                         toreturn = MessageParser.mapToString("sendTo", payload);
                         output.writeUTF(toreturn);
                         break;

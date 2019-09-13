@@ -1,10 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Scanner;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 // Client class 
 public class Client {
@@ -46,27 +43,27 @@ public class Client {
     }
 
     public static void main(String[] args) throws IOException {
-//        //Test file chunking
-//        String dir = System.getProperty("user.dir");
-//        System.out.println(dir);
-//        File testingChunk = new File("C:\\Users\\Miller Ridgeway\\Desktop\\Distributed Systems\\DistributedFileSystem\\src\\Sample.mp4");
-//        Client.chunkFile(testingChunk);
-//
-//        //Test merge together
-//        System.out.println("Chunking complete!");
-//        System.out.println("Now merging back together...");
-//
-//        List<File> chunks = new ArrayList<>();
-//        for(int i = 1; i <= 82; i++){
-//            String chunkNum = String.format("%03d", i);
-//            chunks.add(new File("C:\\Users\\Miller Ridgeway\\Desktop\\Distributed Systems\\DistributedFileSystem\\src\\Sample.mp4." + chunkNum));
-//        }
-//
-//        File dest = new File("Merged.mp4");
-//        dest.createNewFile();
-//        mergeChunks(chunks, dest);
-//
-//        System.out.println("Merge complete.");
+        //Test file chunking
+        String dir = System.getProperty("user.dir");
+        System.out.println(dir);
+        File testingChunk = new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf");
+        int numChunks = Client.chunkFile(testingChunk);
+
+        //Test merge together
+        System.out.println("Chunking complete!");
+        System.out.println("Now merging back together...");
+
+        List<File> chunkFiles = new ArrayList<>();
+        for(int i = 1; i <= numChunks; i++){
+            String chunkNum = String.format("%03d", i);
+            chunkFiles.add(new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf." + chunkNum));
+        }
+
+        File dest = new File("Merged.pdf");
+        dest.createNewFile();
+        mergeChunks(chunkFiles, dest);
+
+        System.out.println("Merge complete.");
 
         try {
             Scanner scn = new Scanner(System.in);
@@ -137,12 +134,13 @@ public class Client {
 
                 switch (parser.getKey()) {
                     case "sendTo":
-                        System.out.println("Sending to: " + parser.getValue());
+                        System.out.println("Sending "+ chunks +" chunks to the following: " + parser.getValue());
+                        String [] servers = parser.getValue().split(",");
                         for (int i = 0; i < chunks; i++) {
                             if (chunks == -1)
                                 System.out.println("Error in chunking the file - chunks =-1");
                             else {
-                                InetAddress ipUpload = InetAddress.getByName(parser.getValue());
+                                InetAddress ipUpload = InetAddress.getByName(servers[i]);
                                 Socket sUpload = new Socket(ipUpload, 555);
                                 DataInputStream disUpload = new DataInputStream(sUpload.getInputStream());
                                 DataOutputStream outUpload = new DataOutputStream(sUpload.getOutputStream());
@@ -150,10 +148,11 @@ public class Client {
                                 //Init connect and file metadeta
                                 outUpload.writeInt(ConnectionType.CLIENT_SEND.getValue());
 
-                                //Send fileName to ChunkServerRecv
+                                //Send fileChunkName to ChunkServerRecv
                                 String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
                                 outUpload.writeUTF(fileChunkName);
 
+                                //Send the full chunk (64kb always) to the chunk server
                                 long fileSize = fileToSend.length();
                                 FileOutputStream fos = new FileOutputStream(fileChunkName);
                                 byte[] buf = new byte[64000];

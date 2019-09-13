@@ -27,11 +27,7 @@ public class ControllerChunkHandler extends Thread {
 
         try {
             while (true) {
-
-
-                // Ask user what he wants
-                output.writeUTF("What do you want?[Date | Time]..\n" +
-                        "Type Exit to terminate connection.");
+                output.writeUTF("Connected to controller - [Exit]");
 
                 // receive the answer from client
                 received = input.readUTF();

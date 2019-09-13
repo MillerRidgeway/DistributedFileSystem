@@ -27,6 +27,7 @@ public class ChunkServerRecv extends Thread {
             fos.write(buf);
 
             System.out.println("Upload complete: " + filename);
+
             // closing resources
             fos.close();
             dis.close();
