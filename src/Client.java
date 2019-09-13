@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.Buffer;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -54,16 +55,16 @@ public class Client {
 //        System.out.println("Now merging back together...");
 //
 //        List<File> chunkFiles = new ArrayList<>();
-//        for (int i = 1; i <= numChunks; i++) {
+//        for (int i = 1; i <= 4; i++) {
 //            String chunkNum = String.format("%03d", i);
-//            chunkFiles.add(new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf." + chunkNum));
+//            chunkFiles.add(new File("C:\\Users\\Miller Ridgeway\\Desktop\\testingFile.pdf." + chunkNum));
 //        }
 //
 //        File dest = new File("Merged.pdf");
 //        dest.createNewFile();
 //        mergeChunks(chunkFiles, dest);
-
-        System.out.println("Merge complete.");
+//
+//        System.out.println("Merge complete.");
 
         try {
             Scanner scn = new Scanner(System.in);
@@ -123,7 +124,7 @@ public class Client {
 
                 //Print & process received data
                 String received = dis.readUTF();
-                System.out.println("The message received was:" + received);
+                System.out.println("The message from the controller was:" + received);
 
                 //Create and print the parsed message
                 MessageParser parser = new MessageParser(received);
@@ -154,14 +155,10 @@ public class Client {
 
                                 //Send a chunk to the chunk server
                                 File chunk = new File(fileChunkName);
-                                long fileSize = chunk.length();
-                                FileOutputStream fos = new FileOutputStream(fileChunkName);
-                                byte[] buf = new byte[(int) fileSize];
+                                System.out.println("Length of chunk file is:" + chunk.length());
+                                byte[] buf = Files.readAllBytes(chunk.toPath());
 
-                                fos.write(buf, 0, (int) (fileSize));
-                                fos.close();
-
-                                outUpload.write(buf, 0, (int)fileSize);
+                                outUpload.write(buf);
                                 disUpload.close();
                                 outUpload.close();
                             }

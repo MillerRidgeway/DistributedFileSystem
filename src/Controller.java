@@ -24,7 +24,7 @@ public class Controller {
         //Init server socket on PORT_NUMBER
         try{
             listener = new ServerSocket(PORT_NUMBER);
-            System.out.println("Listening on port: " + PORT_NUMBER);
+            System.out.println("Controller Server listening on port: " + PORT_NUMBER);
         }
         catch(Exception e)
         {
