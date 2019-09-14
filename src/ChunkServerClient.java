@@ -1,4 +1,5 @@
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.*;
 
@@ -7,11 +8,13 @@ public class ChunkServerClient extends Thread {
     final Socket s;
     final DataInputStream dis;
     final DataOutputStream out;
+    private ArrayList<String> files;
 
     public ChunkServerClient(Socket s, DataInputStream dis, DataOutputStream out){
         this.s = s;
         this.dis = dis;
         this.out = out;
+        this.files = new ArrayList<>();
     }
 
     @Override

@@ -24,6 +24,7 @@ public class Client {
             while ((bytesRemain = bis.read(buffer)) > 0) {
                 String chunkFileName = String.format("%s.%03d", fName, chunkCount++);
                 File newFile = new File(f.getParent(), chunkFileName);
+                System.out.println("Parent is: " + f.getParent());
 
                 try (FileOutputStream out = new FileOutputStream(newFile)) {
                     out.write(buffer, 0, bytesRemain);
@@ -63,7 +64,7 @@ public class Client {
 //        File dest = new File("Merged.pdf");
 //        dest.createNewFile();
 //        mergeChunks(chunkFiles, dest);
-//
+
 //        System.out.println("Merge complete.");
 
         try {
@@ -95,14 +96,14 @@ public class Client {
                 String tosend = scn.nextLine();
 
                 //Parse the command and then take the appropriate action
-                switch (tosend) {
-                    case "Exit":
+                switch (tosend.toLowerCase()) {
+                    case "exit":
                         System.out.println("Closing this connection : " + s);
                         s.close();
                         System.out.println("Connection closed");
                         break net_recv;
 
-                    case "Send":
+                    case "send":
                         System.out.println("Please input filename to send: ");
                         tosend = scn.nextLine();
 
@@ -112,6 +113,11 @@ public class Client {
                         tosend = MessageParser.mapToString("send", payload);
 
                         out.writeUTF(tosend);
+                        break;
+
+                    case "pull":
+                        System.out.println("Please input filename to pull: ");
+                        tosend = scn.nextLine();
                         break;
 
                     default:
@@ -154,8 +160,7 @@ public class Client {
                                 outUpload.writeUTF(fileChunkName);
 
                                 //Send a chunk to the chunk server
-                                File chunk = new File(fileChunkName);
-                                System.out.println("Length of chunk file is:" + chunk.length());
+                                File chunk = new File(fileToSend.getParent() + "\\" + fileChunkName);
                                 byte[] buf = Files.readAllBytes(chunk.toPath());
 
                                 outUpload.write(buf);
