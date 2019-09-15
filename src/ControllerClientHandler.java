@@ -33,7 +33,7 @@ public class ControllerClientHandler extends Thread {
                 // receive the answer from client
                 received = input.readUTF();
 
-                if (received.equals("Exit")) {
+                if (received.equals("exit")) {
                     System.out.println("Client " + this.connection + " sends exit...");
                     System.out.println("Closing this connection.");
                     this.connection.close();

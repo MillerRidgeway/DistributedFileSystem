@@ -2,13 +2,14 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.*;
+import java.util.Timer;
 
 
 public class ChunkServerClient extends Thread {
     final Socket s;
     final DataInputStream dis;
     final DataOutputStream out;
-    private ArrayList<File> files, newFiles;
+    public static ArrayList<String> files, newFiles;
 
     public ChunkServerClient(Socket s, DataInputStream dis, DataOutputStream out) {
         this.s = s;
@@ -26,6 +27,9 @@ public class ChunkServerClient extends Thread {
 
             out.writeInt(ConnectionType.CHUNK.getValue());
             System.out.println("Sent connect ID type: " + ConnectionType.CHUNK);
+
+            Timer minorHeartbeat = new Timer();
+            minorHeartbeat.schedule(new Heartbeat(s,out), 0, 5000);
 
             // the following loop performs the exchange of
             // information between client and client handler

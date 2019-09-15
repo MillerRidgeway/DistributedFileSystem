@@ -24,11 +24,17 @@ public class ChunkServerRecv extends Thread {
             int count;
             byte[] buf = new byte[64000];
             FileOutputStream fos = new FileOutputStream("C:\\Users\\Miller Ridgeway\\Desktop\\" + filename);
-            while((count = dis.read(buf)) > 0){
+            while ((count = dis.read(buf)) > 0) {
                 fos.write(buf, 0, count);
             }
 
-            Controller.addFile(s.getRemoteSocketAddress().toString(), filename);
+            synchronized (ChunkServerClient.files) {
+                ChunkServerClient.newFiles.add(filename);
+            }
+            synchronized (ChunkServerClient.files) {
+                ChunkServerClient.files.add(filename);
+            }
+
             System.out.println("Upload complete: " + filename);
 
             // closing resources

@@ -10,9 +10,6 @@ public class Controller {
 
     public static InetAddress getChunkServer() throws UnknownHostException {
         //Do this based on available space within each chunk server - for now just give a chunk server
-//        for(Thread t: currentChunkConnections){
-//            if(t instanceof ControllerChunkHandler) return ((ControllerChunkHandler) t).connection.getInetAddress();
-//        }
         return currentChunkConnections.get(0);
     }
 
@@ -38,7 +35,7 @@ public class Controller {
             return;
         }
 
-        //Bind to socket and spawn client handler
+        //Bind to socket and spawn handler based on client type
         while (true) {
             try {
                 connection = listener.accept();
@@ -53,8 +50,7 @@ public class Controller {
                 System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType));
 
                 //New connection thread based on connection type
-                //Only two cases, client connection or new chunk server
-                //Anything else is unrecognized
+                //Don't make a new thread for heartbeats, only update file lists.
                 switch (ConnectionType.fromInteger(threadType)) {
                     case CLIENT:
                         Thread clientThread = new ControllerClientHandler(connection, input, output);
@@ -69,7 +65,6 @@ public class Controller {
                     default:
                         System.out.println("Unrecognized connection attempt...ignoring");
                         break;
-
                 }
             } catch (Exception e) {
                 System.out.println("Error in binding / writing");

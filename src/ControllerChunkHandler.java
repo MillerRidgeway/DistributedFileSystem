@@ -32,7 +32,7 @@ public class ControllerChunkHandler extends Thread {
                 // receive the answer from client
                 received = input.readUTF();
 
-                if (received.equals("Exit")) {
+                if (received.equalsIgnoreCase("exit")) {
                     System.out.println("Client " + this.connection + " sends exit...");
                     System.out.println("Closing this connection.");
                     this.connection.close();
@@ -40,23 +40,23 @@ public class ControllerChunkHandler extends Thread {
                     break;
                 }
 
-                // creating Date object
-                Date date = new Date();
 
                 // write on output stream based on the
                 // answer from the client
-                switch (received) {
+                //Create and print the parsed message
+                MessageParser parser = new MessageParser(received);
+                System.out.println("Parsed KV string: " + parser.getParsedKV());
+                System.out.println("Parsed Key: " + parser.getKey());
+                System.out.println("Parsed Value: " + parser.getValue() + "\n");
 
-                    case "Date":
-                        toreturn = fordate.format(date);
-                        output.writeUTF(toreturn);
+                switch (parser.getKey()) {
+                    case "minorHeartbeat":
+                        String [] files = parser.getValue().split(",");
+                        System.out.println("Updating controller index with the following files: " + parser.getValue() + "\n");
+                        for(int i = 0; i < files.length; i++){
+                            Controller.addFile(connection.getInetAddress().getHostAddress(), files[i]);
+                        }
                         break;
-
-                    case "Time":
-                        toreturn = fortime.format(date);
-                        output.writeUTF(toreturn);
-                        break;
-
                     default:
                         output.writeUTF("Invalid input");
                         break;
