@@ -53,9 +53,8 @@ public class ControllerClientHandler extends Thread {
                     case "send":
                         System.out.println("Replying with sendTo");
                         String chunkServList = "";
-                        for(int i = 0; i < Integer.parseInt(parser.getValue()); i++)
-                        {
-                            if(i == Integer.parseInt(parser.getValue()) - 1)
+                        for (int i = 0; i < Integer.parseInt(parser.getValue()); i++) {
+                            if (i == Integer.parseInt(parser.getValue()) - 1)
                                 chunkServList += Controller.getChunkServer().getHostAddress();
                             else
                                 chunkServList += Controller.getChunkServer().getHostAddress() + ",";

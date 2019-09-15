@@ -1,16 +1,23 @@
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Controller {
     public static ArrayList<InetAddress> currentChunkConnections = new ArrayList<>();
+    public static Map<String, String> files = new HashMap<>();
 
-    public static InetAddress getChunkServer() throws UnknownHostException{
+    public static InetAddress getChunkServer() throws UnknownHostException {
         //Do this based on available space within each chunk server - for now just give a chunk server
 //        for(Thread t: currentChunkConnections){
 //            if(t instanceof ControllerChunkHandler) return ((ControllerChunkHandler) t).connection.getInetAddress();
 //        }
         return currentChunkConnections.get(0);
+    }
+
+    public static void addFile(String addr, String filename) {
+        files.merge(addr, filename, (a, b) -> a + "," + b);
     }
 
     public static void main(String[] args) {
@@ -22,20 +29,18 @@ public class Controller {
         Socket connection;
 
         //Init server socket on PORT_NUMBER
-        try{
+        try {
             listener = new ServerSocket(PORT_NUMBER);
             System.out.println("Controller Server listening on port: " + PORT_NUMBER);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("ERROR: Unexpected server shutdown");
             System.out.println("Error is: " + e);
             return;
         }
 
         //Bind to socket and spawn client handler
-        while(true) {
-            try{
+        while (true) {
+            try {
                 connection = listener.accept();
                 System.out.println("New connection: " + connection);
 
@@ -50,7 +55,7 @@ public class Controller {
                 //New connection thread based on connection type
                 //Only two cases, client connection or new chunk server
                 //Anything else is unrecognized
-                switch(ConnectionType.fromInteger(threadType)){
+                switch (ConnectionType.fromInteger(threadType)) {
                     case CLIENT:
                         Thread clientThread = new ControllerClientHandler(connection, input, output);
                         clientThread.start();
@@ -66,8 +71,7 @@ public class Controller {
                         break;
 
                 }
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 System.out.println("Error in binding / writing");
                 System.out.println("Error is: " + e);
             }

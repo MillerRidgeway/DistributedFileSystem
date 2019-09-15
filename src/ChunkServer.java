@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -22,10 +21,9 @@ public class ChunkServer {
             System.out.println("Error connecting chunk client to controller server: "+ e);
         }
 
-        //Host port
+        //File upload server
         final int PORT_NUMBER = 555;
 
-        //Socket / Server
         ServerSocket listener;
         Socket connection;
 
@@ -41,7 +39,7 @@ public class ChunkServer {
             return;
         }
 
-        //Bind to socket and spawn new chunk server client
+        //Bind to socket and spawn new chunk server receiver or pusher
         while(true) {
             try {
                 connection = listener.accept();

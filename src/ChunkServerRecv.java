@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class ChunkServerRecv extends Thread {
     final Socket s;
@@ -27,6 +28,7 @@ public class ChunkServerRecv extends Thread {
                 fos.write(buf, 0, count);
             }
 
+            Controller.addFile(s.getRemoteSocketAddress().toString(), filename);
             System.out.println("Upload complete: " + filename);
 
             // closing resources

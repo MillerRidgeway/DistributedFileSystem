@@ -8,14 +8,16 @@ public class ChunkServerClient extends Thread {
     final Socket s;
     final DataInputStream dis;
     final DataOutputStream out;
-    private ArrayList<String> files;
+    private ArrayList<File> files, newFiles;
 
-    public ChunkServerClient(Socket s, DataInputStream dis, DataOutputStream out){
+    public ChunkServerClient(Socket s, DataInputStream dis, DataOutputStream out) {
         this.s = s;
         this.dis = dis;
         this.out = out;
         this.files = new ArrayList<>();
+        this.newFiles = new ArrayList<>();
     }
+
 
     @Override
     public void run() {

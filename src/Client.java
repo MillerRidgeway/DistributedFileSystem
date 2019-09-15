@@ -24,7 +24,6 @@ public class Client {
             while ((bytesRemain = bis.read(buffer)) > 0) {
                 String chunkFileName = String.format("%s.%03d", fName, chunkCount++);
                 File newFile = new File(f.getParent(), chunkFileName);
-                System.out.println("Parent is: " + f.getParent());
 
                 try (FileOutputStream out = new FileOutputStream(newFile)) {
                     out.write(buffer, 0, bytesRemain);
