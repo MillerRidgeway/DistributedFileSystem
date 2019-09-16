@@ -75,13 +75,12 @@ public class ControllerClientHandler extends Thread {
                         String serverList = "";
                         boolean first = true;
                         for (String s : fileList) {
-                            if(!serverList.contains(Controller.files.get(s))){
-                                if(first)
+                            if (!serverList.contains(Controller.files.get(s))) {
+                                if (first)
                                     serverList += Controller.files.get(s);
                                 else
                                     serverList += "," + Controller.files.get(s);
                             }
-
                         }
 
                         payload.put("pullFrom", serverList);

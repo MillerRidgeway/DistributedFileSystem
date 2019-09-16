@@ -175,6 +175,7 @@ public class Client {
                         break;
                     case "pullFrom":
                         String[] pullServers = parser.getValue().split(",");
+                        List<File> files = new ArrayList<>();
                         for (int i = 0; i < pullServers.length; i++) {
                             InetAddress ipPull = InetAddress.getByName(pullServers[i]);
                             Socket sPull = new Socket(ipPull, 555);
@@ -187,20 +188,38 @@ public class Client {
 
                             //Read in the chunks available on a given server
                             int numChunks = disPull.readInt();
-                            for(int j = 0; j < numChunks; j++)
-                            {
-                                String filename = disPull.readUTF();
-                                long length = disPull.readLong();
-                                System.out.println("Writing " + filename);
-                                int n;
-                                byte[] buf = new byte[64000];
-                                FileOutputStream fos = new FileOutputStream("C:\\Users\\Miller Ridgeway\\Desktop\\" + filename);
-                                while (length > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, length))) != -1)
-                                {
-                                    fos.write(buf,0,n);
-                                    length -= n;
+                            System.out.println("This file has " + numChunks + " pieces at " + pullServers[i]);
+                            byte[] buf = new byte[64000 * numChunks];
+                            int n = 0;
+                            boolean remain = true;
+                            while (remain) {
+                                try {
+                                    //Read the file name and size first
+                                    String filename = disPull.readUTF();
+                                    long fileSize = disPull.readLong();
+
+                                    //Create a new file for the output stream to write to
+                                    File f = new File(filename);
+                                    f.createNewFile();
+                                    FileOutputStream fos = new FileOutputStream(f);
+                                    System.out.println("File to read is: " + filename + "," + fileSize);
+
+                                    //Now read the contents of the file, looping at each new file
+                                    while (fileSize > 0 && (n = disPull.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
+                                        fos.write(buf, 0, n);
+                                        fileSize -= n;
+                                    }
+                                    files.add(f);
+                                    fos.close();
+                                } catch (Exception e) {
+                                    System.out.println("Read all chunks.");
+                                    remain = false;
                                 }
                             }
+                            //Merge the file chunks into an output file once again.
+                            File merged = new File(payload.get("pull"));
+                            merged.createNewFile();
+                            mergeChunks(files, merged);
                         }
                         break;
                     default:

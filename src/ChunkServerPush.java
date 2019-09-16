@@ -30,21 +30,24 @@ public class ChunkServerPush extends Thread {
                 }
             });
 
-            //Tell the client how many chunks you will be sending
+            //Send the number of chunks on this server
             out.writeInt(foundFiles.length);
+            out.flush();
+
+            //Send the file names, length, and content
             int n = 0;
-            byte [] buf = new byte[64000];
-            //Send the chunks
-            for (int i = 0; i < foundFiles.length; i++) {
-                out.writeUTF(foundFiles[i].getName());
-                out.writeLong(foundFiles[i].length());
-                FileInputStream fis = new FileInputStream(foundFiles[i]);
-                while((n =fis.read(buf)) != -1){
-                    out.write(buf,0,n);
+            byte[] buf = new byte[64000 * foundFiles.length];
+            for (File f : foundFiles) {
+                out.writeUTF(f.getName());
+                out.writeLong(f.length());
+
+                FileInputStream fis = new FileInputStream(f);
+                while ((n = fis.read(buf)) != -1) {
+                    out.write(buf, 0, n);
                     out.flush();
                 }
-            }
 
+            }
             System.out.println("Sent " + foundFiles.length + " chunks of the file " + filename);
 
             dis.close();
