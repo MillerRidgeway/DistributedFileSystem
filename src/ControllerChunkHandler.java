@@ -54,7 +54,7 @@ public class ControllerChunkHandler extends Thread {
                         String [] files = parser.getValue().split(",");
                         System.out.println("Updating controller index with the following files: " + parser.getValue() + "\n");
                         for(int i = 0; i < files.length; i++){
-                            Controller.addFile(connection.getInetAddress().getHostAddress(), files[i]);
+                            Controller.addFile(files[i], connection.getInetAddress().getHostAddress());
                         }
                         break;
                     default:

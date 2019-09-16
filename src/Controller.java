@@ -9,6 +9,7 @@ public class Controller {
     public static Map<String, String> files = new HashMap<>();
 
     public static InetAddress getChunkServer() throws UnknownHostException {
+        //TODO - Make method select a server at random until space becomes an issue
         //Do this based on available space within each chunk server - for now just give a chunk server
         return currentChunkConnections.get(0);
     }

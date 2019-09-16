@@ -16,7 +16,7 @@ public class ChunkServerRecv extends Thread {
     @Override
     public void run() {
         try {
-            //Print file-chunk name
+            //Get the filename
             String filename = dis.readUTF();
             System.out.println("Uploading: " + filename);
 
@@ -28,6 +28,7 @@ public class ChunkServerRecv extends Thread {
                 fos.write(buf, 0, count);
             }
 
+            //Add the files to locally tracked list of files
             synchronized (ChunkServerClient.files) {
                 ChunkServerClient.newFiles.add(filename);
             }

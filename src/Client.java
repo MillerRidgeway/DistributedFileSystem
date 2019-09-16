@@ -117,13 +117,18 @@ public class Client {
                     case "pull":
                         System.out.println("Please input filename to pull: ");
                         tosend = scn.nextLine();
+
+                        payload.put("pull", tosend);
+                        tosend = MessageParser.mapToString("pull", payload);
+
+                        System.out.println("Sending " + tosend);
+
+                        out.writeUTF(tosend);
                         break;
 
                     default:
                         System.out.println("Unrecognized command " + tosend);
-                        System.out.println("The server will now close the connection");
-
-                        out.writeUTF(tosend);
+                        System.out.println("Please try again: [Send | Pull | Exit]");
                         break;
                 }
 
@@ -141,12 +146,12 @@ public class Client {
                 switch (parser.getKey()) {
                     case "sendTo":
                         System.out.println("Sending " + chunks + " chunks to the following: " + parser.getValue());
-                        String[] servers = parser.getValue().split(",");
+                        String[] sendServers = parser.getValue().split(",");
                         for (int i = 0; i < chunks; i++) {
                             if (chunks == -1)
                                 System.out.println("Error in chunking the file - chunks =-1");
                             else {
-                                InetAddress ipUpload = InetAddress.getByName(servers[i]);
+                                InetAddress ipUpload = InetAddress.getByName(sendServers[i]);
                                 Socket sUpload = new Socket(ipUpload, 555);
                                 DataInputStream disUpload = new DataInputStream(sUpload.getInputStream());
                                 DataOutputStream outUpload = new DataOutputStream(sUpload.getOutputStream());
@@ -167,6 +172,41 @@ public class Client {
                                 outUpload.close();
                             }
                         }
+                        break;
+                    case "pullFrom":
+                        String[] pullServers = parser.getValue().split(",");
+                        for (int i = 0; i < pullServers.length; i++) {
+                            InetAddress ipPull = InetAddress.getByName(pullServers[i]);
+                            Socket sPull = new Socket(ipPull, 555);
+                            DataInputStream disPull = new DataInputStream(sPull.getInputStream());
+                            DataOutputStream outPull = new DataOutputStream(sPull.getOutputStream());
+
+                            //Send connection type and name of file to search for
+                            outPull.writeInt(ConnectionType.CLIENT_PULL.getValue());
+                            outPull.writeUTF(payload.get("pull"));
+
+                            //Read in the chunks available on a given server
+                            int numChunks = disPull.readInt();
+                            for(int j = 0; j < numChunks; j++)
+                            {
+                                String filename = disPull.readUTF();
+                                long length = disPull.readLong();
+                                System.out.println("Writing " + filename);
+                                int n;
+                                byte[] buf = new byte[64000];
+                                FileOutputStream fos = new FileOutputStream("C:\\Users\\Miller Ridgeway\\Desktop\\" + filename);
+                                while (length > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, length))) != -1)
+                                {
+                                    fos.write(buf,0,n);
+                                    length -= n;
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        System.out.println("Unknown reply from chunk server");
+                        break;
+
                 }
             }
 

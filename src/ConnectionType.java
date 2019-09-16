@@ -1,5 +1,5 @@
 public enum ConnectionType {
-    CHUNK(100), CLIENT(200), CLIENT_SEND(300), CHUNK_SEND(400);
+    CHUNK(100), CLIENT(200), CLIENT_SEND(300), CLIENT_PULL(400);
 
     private final int value;
 
@@ -20,7 +20,7 @@ public enum ConnectionType {
             case 300:
                 return CLIENT_SEND;
             case 400:
-                return CHUNK_SEND;
+                return CLIENT_PULL;
         }
         return null;
     }

@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ControllerClientHandler extends Thread {
     final DataInputStream input;
@@ -27,8 +29,7 @@ public class ControllerClientHandler extends Thread {
         try {
             while (true) {
                 // Ask user what he wants
-                output.writeUTF("What do you want? [Send | Exit]..\n" +
-                        "Type Exit to terminate connection.");
+                output.writeUTF("What do you want? [Send | Pull | Exit]..\n");
 
                 // receive the answer from client
                 received = input.readUTF();
@@ -51,7 +52,6 @@ public class ControllerClientHandler extends Thread {
 
                 switch (parser.getKey()) {
                     case "send":
-                        System.out.println("Replying with sendTo");
                         String chunkServList = "";
                         for (int i = 0; i < Integer.parseInt(parser.getValue()); i++) {
                             if (i == Integer.parseInt(parser.getValue()) - 1)
@@ -62,6 +62,32 @@ public class ControllerClientHandler extends Thread {
                         payload.put("sendTo", chunkServList);
                         toreturn = MessageParser.mapToString("sendTo", payload);
                         output.writeUTF(toreturn);
+                        System.out.println("Replied with sendTo" + "\n");
+                        break;
+                    case "pull":
+                        System.out.println("Length of file list is:" + Controller.files.size());
+                        String filename = parser.getValue();
+                        Set<String> fileList = Controller.files.keySet()
+                                .stream()
+                                .filter(s -> s.startsWith(filename))
+                                .collect(Collectors.toSet());
+
+                        String serverList = "";
+                        boolean first = true;
+                        for (String s : fileList) {
+                            if(!serverList.contains(Controller.files.get(s))){
+                                if(first)
+                                    serverList += Controller.files.get(s);
+                                else
+                                    serverList += "," + Controller.files.get(s);
+                            }
+
+                        }
+
+                        payload.put("pullFrom", serverList);
+                        toreturn = MessageParser.mapToString("pullFrom", payload);
+                        output.writeUTF(toreturn);
+                        System.out.println("Replied with pullFrom" + "\n");
                         break;
                     default:
                         output.writeUTF("Invalid input");
