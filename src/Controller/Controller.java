@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 
 public class Controller {
     public static ArrayList<InetAddress> currentChunkConnections = new ArrayList<>();
@@ -64,6 +65,12 @@ public class Controller {
                         ControllerChunkHandler chunkThread = new ControllerChunkHandler(connection, input, output);
                         currentChunkConnections.add(chunkThread.connection.getInetAddress());
                         chunkThread.start();
+
+                        //Keepalive check
+                        Timer statusCheck = new Timer();
+                        Monitor m = new Monitor(connection.getInetAddress().getHostName(), 555);
+                        statusCheck.schedule(m,0,10000);
+
                         System.out.println("Chunk servers connected: " + currentChunkConnections.size() + "\n");
                         break;
                     default:
