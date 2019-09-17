@@ -1,10 +1,11 @@
+package Controller;
+
+import Messages.MessageParser;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class ControllerChunkHandler extends Thread {
     final DataInputStream input;

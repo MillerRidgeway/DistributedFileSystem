@@ -1,3 +1,5 @@
+package ChunkServer;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.*;
@@ -23,7 +25,7 @@ public class ChunkServerPush extends Thread {
             System.out.println("Searching for " + filename);
 
             //Array of chunks that match the filename on this server
-            File dir = new File("C:\\Users\\Miller Ridgeway\\Desktop");
+            File dir = new File("C:\\Users\\Miller Ridgeway\\Desktop\\Chunk1");
             File[] foundFiles = dir.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String name) {
                     return name.startsWith(filename);

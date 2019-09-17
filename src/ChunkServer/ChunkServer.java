@@ -1,11 +1,14 @@
+package ChunkServer;
+
+import Messages.ConnectionType;
+
 import java.net.*;
 import java.io.*;
-import java.util.ArrayList;
 
 public class ChunkServer {
 
     public static void main(String[] args) {
-        //Start ChunkServerClient connection to controller - manages heartbeats
+        //Start ChunkServer.ChunkServerClient connection to controller - manages heartbeats
         //controller interactions, etc.
         try {
             InetAddress ip = InetAddress.getByName("localhost");

@@ -1,3 +1,5 @@
+package Messages;
+
 import java.util.Map;
 
 public class MessageParser {

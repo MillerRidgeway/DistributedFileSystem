@@ -1,10 +1,14 @@
+package Client;
+
+import Messages.ConnectionType;
+import Messages.MessageParser;
+
 import java.io.*;
 import java.net.*;
-import java.nio.Buffer;
 import java.nio.file.Files;
 import java.util.*;
 
-// Client class 
+// Client.Client class
 public class Client {
     //-----FILE CHUNKING----------------------------------
     //Split a given file into 64KB chunks
@@ -48,7 +52,7 @@ public class Client {
 //        String dir = System.getProperty("user.dir");
 //        System.out.println(dir);
 //        File testingChunk = new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf");
-//        int numChunks = Client.chunkFile(testingChunk);
+//        int numChunks = Client.Client.chunkFile(testingChunk);
 //
 //        //Test merge together
 //        System.out.println("Chunking complete!");
@@ -88,7 +92,7 @@ public class Client {
             System.out.println("Sent connect ID type: " + ConnectionType.CLIENT + "\n");
 
             // the following loop performs the exchange of
-            // information between client and Controller Client Handler class
+            // information between client and Controller.Controller Client.Client Handler class
             net_recv:
             while (true) {
                 System.out.println(dis.readUTF());
@@ -159,7 +163,7 @@ public class Client {
                                 //Init connect and file metadeta
                                 outUpload.writeInt(ConnectionType.CLIENT_SEND.getValue());
 
-                                //Send fileChunkName to ChunkServerRecv
+                                //Send fileChunkName to ChunkServer.ChunkServerRecv
                                 String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
                                 outUpload.writeUTF(fileChunkName);
 

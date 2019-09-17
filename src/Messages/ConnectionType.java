@@ -1,3 +1,5 @@
+package Messages;
+
 public enum ConnectionType {
     CHUNK(100), CLIENT(200), CLIENT_SEND(300), CLIENT_PULL(400);
 

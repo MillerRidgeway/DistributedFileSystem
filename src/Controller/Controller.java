@@ -1,3 +1,7 @@
+package Controller;
+
+import Messages.ConnectionType;
+
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -29,7 +33,7 @@ public class Controller {
         //Init server socket on PORT_NUMBER
         try {
             listener = new ServerSocket(PORT_NUMBER);
-            System.out.println("Controller Server listening on port: " + PORT_NUMBER);
+            System.out.println("Controller server listening on port: " + PORT_NUMBER);
         } catch (Exception e) {
             System.out.println("ERROR: Unexpected server shutdown");
             System.out.println("Error is: " + e);

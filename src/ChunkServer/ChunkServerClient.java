@@ -1,9 +1,12 @@
+package ChunkServer;
+
+import Messages.ConnectionType;
+
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.*;
 import java.util.Timer;
-
 
 public class ChunkServerClient extends Thread {
     final Socket s;
