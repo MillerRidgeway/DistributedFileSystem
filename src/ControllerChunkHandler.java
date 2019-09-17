@@ -11,9 +11,6 @@ public class ControllerChunkHandler extends Thread {
     final DataOutputStream output;
     final Socket connection;
 
-    DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
-    DateFormat fortime = new SimpleDateFormat("hh:mm:ss");
-
     public ControllerChunkHandler(Socket s, DataInputStream in, DataOutputStream out) {
         this.connection = s;
         this.input = in;
@@ -27,7 +24,7 @@ public class ControllerChunkHandler extends Thread {
 
         try {
             while (true) {
-                output.writeUTF("Connected to controller - [Exit]");
+                output.writeUTF("Connected to controller - [Exit] to exit");
 
                 // receive the answer from client
                 received = input.readUTF();
@@ -51,10 +48,15 @@ public class ControllerChunkHandler extends Thread {
 
                 switch (parser.getKey()) {
                     case "minorHeartbeat":
-                        String [] files = parser.getValue().split(",");
+                        String[] files = parser.getValue().split(",");
                         System.out.println("Updating controller index with the following files: " + parser.getValue() + "\n");
-                        for(int i = 0; i < files.length; i++){
-                            Controller.addFile(files[i], connection.getInetAddress().getHostAddress());
+                        if (parser.getValue() != "null") {
+                            for (int i = 0; i < files.length; i++) {
+                                Controller.addFile(files[i], connection.getInetAddress().getHostAddress());
+                                if (Controller.files.get(files[i]).split(",").length < 3) {
+                                    System.out.println("Less than three copies of " + files[i] + " forwarding to active server");
+                                }
+                            }
                         }
                         break;
                     default:

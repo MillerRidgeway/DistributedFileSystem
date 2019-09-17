@@ -16,9 +16,8 @@ public class ChunkServer {
 
             ChunkServerClient controllerConnection = new ChunkServerClient(controllerSocket, dis, out);
             controllerConnection.start();
-        }
-        catch(Exception e){
-            System.out.println("Error connecting chunk client to controller server: "+ e);
+        } catch (Exception e) {
+            System.out.println("Error connecting chunk client to controller server: " + e);
         }
 
         //File upload server
@@ -28,19 +27,17 @@ public class ChunkServer {
         Socket connection;
 
         //Init server socket on PORT_NUMBER
-        try{
+        try {
             listener = new ServerSocket(PORT_NUMBER);
             System.out.println("Listening on port: " + PORT_NUMBER);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("ERROR: Unexpected chunk server shutdown");
             System.out.println("Error is: " + e);
             return;
         }
 
         //Bind to socket and spawn new chunk server receiver or pusher
-        while(true) {
+        while (true) {
             try {
                 connection = listener.accept();
                 System.out.println("New connection: " + connection);
@@ -51,9 +48,9 @@ public class ChunkServer {
 
                 //Determine connection type from first integer sent
                 int threadType = input.readInt();
-                System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType) +"\n");
+                System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType) + "\n");
 
-                switch(ConnectionType.fromInteger(threadType)){
+                switch (ConnectionType.fromInteger(threadType)) {
                     case CLIENT_SEND:
                         ChunkServerRecv recv = new ChunkServerRecv(connection, input, output);
                         recv.start();
@@ -63,9 +60,7 @@ public class ChunkServer {
                         push.start();
                         break;
                 }
-            }
-
-            catch(Exception e){
+            } catch (Exception e) {
                 System.out.println("Error in binding / writing to chunk server socket");
                 System.out.println("Error is: " + e);
             }

@@ -220,6 +220,10 @@ public class Client {
                             File merged = new File(payload.get("pull"));
                             merged.createNewFile();
                             mergeChunks(files, merged);
+
+                            for (File f : files) {
+                                f.delete();
+                            }
                         }
                         break;
                     default:

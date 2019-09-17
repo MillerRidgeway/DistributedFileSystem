@@ -1,6 +1,6 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.security.MessageDigest;
 
 public class ChunkServerRecv extends Thread {
     final Socket s;
@@ -23,7 +23,7 @@ public class ChunkServerRecv extends Thread {
             //Get file from client
             int count;
             byte[] buf = new byte[64000];
-            FileOutputStream fos = new FileOutputStream("C:\\Users\\Miller Ridgeway\\Desktop\\" + filename);
+            FileOutputStream fos = new FileOutputStream("C:\\Users\\Miller Ridgeway\\Desktop\\Chunk1" + filename);
             while ((count = dis.read(buf)) > 0) {
                 fos.write(buf, 0, count);
             }

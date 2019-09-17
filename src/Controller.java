@@ -51,7 +51,6 @@ public class Controller {
                 System.out.println("New connection type is: " + ConnectionType.fromInteger(threadType));
 
                 //New connection thread based on connection type
-                //Don't make a new thread for heartbeats, only update file lists.
                 switch (ConnectionType.fromInteger(threadType)) {
                     case CLIENT:
                         Thread clientThread = new ControllerClientHandler(connection, input, output);
