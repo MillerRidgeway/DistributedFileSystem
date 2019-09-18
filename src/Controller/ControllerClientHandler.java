@@ -53,6 +53,7 @@ public class ControllerClientHandler extends Thread {
 
                 switch (parser.getKey()) {
                     case "send":
+
                         String chunkServList = "";
                         for (int i = 0; i < Integer.parseInt(parser.getValue()); i++) {
                             if (i == Integer.parseInt(parser.getValue()) - 1)
@@ -63,6 +64,7 @@ public class ControllerClientHandler extends Thread {
                         payload.put("sendTo", chunkServList);
                         toreturn = MessageParser.mapToString("sendTo", payload);
                         output.writeUTF(toreturn);
+                        output.writeUTF("testing");
                         System.out.println("Replied with sendTo" + "\n");
                         break;
                     case "pull":

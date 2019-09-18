@@ -149,6 +149,7 @@ public class Client {
 
                 switch (parser.getKey()) {
                     case "sendTo":
+                        System.out.println(dis.readUTF());
                         System.out.println("Sending " + chunks + " chunks to the following: " + parser.getValue());
                         String[] sendServers = parser.getValue().split(",");
                         for (int i = 0; i < chunks; i++) {

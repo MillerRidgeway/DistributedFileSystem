@@ -11,6 +11,7 @@ import java.util.Timer;
 
 public class Controller {
     public static ArrayList<InetAddress> currentChunkConnections = new ArrayList<>();
+    public static ArrayList<Monitor> monitors = new ArrayList<>();
     public static Map<String, String> files = new HashMap<>();
 
     public static InetAddress getChunkServer() throws UnknownHostException {
@@ -27,9 +28,10 @@ public class Controller {
         //Host port
         final int PORT_NUMBER = 444;
 
-        //Socket / Server
+        //Socket / Server / Keepalive
         ServerSocket listener;
         Socket connection;
+        Timer statusCheck = new Timer();
 
         //Init server socket on PORT_NUMBER
         try {
@@ -67,9 +69,9 @@ public class Controller {
                         chunkThread.start();
 
                         //Keepalive check
-                        Timer statusCheck = new Timer();
                         Monitor m = new Monitor(connection.getInetAddress().getHostName(), 555);
-                        statusCheck.schedule(m,0,10000);
+                        monitors.add(m);
+                        statusCheck.schedule(m, 0, 10000);
 
                         System.out.println("Chunk servers connected: " + currentChunkConnections.size() + "\n");
                         break;
