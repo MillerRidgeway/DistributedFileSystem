@@ -21,6 +21,10 @@ public class ChunkServerRecv extends Thread {
             String filename = dis.readUTF();
             System.out.println("Uploading: " + filename);
 
+            //Get the locations to forward to
+            String forwardMessage = dis.readUTF();
+            System.out.println("This was the forward message from cli: "+ forwardMessage);
+
             //Get file from client
             int count;
             byte[] buf = new byte[64000];

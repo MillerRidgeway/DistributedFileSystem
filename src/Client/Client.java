@@ -149,7 +149,17 @@ public class Client {
 
                 switch (parser.getKey()) {
                     case "sendTo":
-                        System.out.println(dis.readUTF());
+                        //Include the forwardTo message from the controller
+                        //so the forwardTo doesn't have to be requested later
+                        String forwardMessage = dis.readUTF();
+                        MessageParser parseForward = new MessageParser(forwardMessage);
+                        System.out.println("Parsed KV string: " + parseForward.getParsedKV());
+                        System.out.println("Parsed Key: " + parseForward.getKey());
+                        System.out.println("Parsed Value: " + parseForward.getValue());
+                        System.out.println("");
+
+                        //Send the corresponding chunks to the servers returned from
+                        //the controller
                         System.out.println("Sending " + chunks + " chunks to the following: " + parser.getValue());
                         String[] sendServers = parser.getValue().split(",");
                         for (int i = 0; i < chunks; i++) {
@@ -161,12 +171,13 @@ public class Client {
                                 DataInputStream disUpload = new DataInputStream(sUpload.getInputStream());
                                 DataOutputStream outUpload = new DataOutputStream(sUpload.getOutputStream());
 
-                                //Init connect and file metadeta
+                                //Init connect and filename
                                 outUpload.writeInt(ConnectionType.CLIENT_SEND.getValue());
 
                                 //Send fileChunkName to ChunkServer.ChunkServerRecv
                                 String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
                                 outUpload.writeUTF(fileChunkName);
+                                outUpload.writeUTF(forwardMessage);
 
                                 //Send a chunk to the chunk server
                                 File chunk = new File(fileToSend.getParent() + "\\" + fileChunkName);
