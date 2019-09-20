@@ -10,66 +10,8 @@ import java.util.*;
 
 // Client.Client class
 public class Client {
-    //-----FILE CHUNKING----------------------------------
-    //Split a given file into 64KB chunks
-    public static int chunkFile(File f) throws IOException {
-        int chunkCount = 1;
-        int fileSize = 64000;
-
-        byte[] buffer = new byte[fileSize];
-
-        String fName = f.getName();
-
-        try (FileInputStream fis = new FileInputStream(f)) {
-            BufferedInputStream bis = new BufferedInputStream(fis);
-
-            //Init to 0, assign in while
-            int bytesRemain = 0;
-            while ((bytesRemain = bis.read(buffer)) > 0) {
-                String chunkFileName = String.format("%s.%03d", fName, chunkCount++);
-                File newFile = new File(f.getParent(), chunkFileName);
-
-                try (FileOutputStream out = new FileOutputStream(newFile)) {
-                    out.write(buffer, 0, bytesRemain);
-                }
-            }
-        }
-
-        return chunkCount - 1;
-    }
-
-    public static void mergeChunks(List<File> files, File dest) throws IOException {
-        try (FileOutputStream out = new FileOutputStream(dest);
-             BufferedOutputStream mergingStream = new BufferedOutputStream(out)) {
-            for (File f : files) {
-                Files.copy(f.toPath(), mergingStream);
-            }
-        }
-    }
 
     public static void main(String[] args) throws IOException {
-//        //Test file chunking
-//        String dir = System.getProperty("user.dir");
-//        System.out.println(dir);
-//        File testingChunk = new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem\\src\\testingFile.pdf");
-//        int numChunks = Client.Client.chunkFile(testingChunk);
-//
-//        //Test merge together
-//        System.out.println("Chunking complete!");
-//        System.out.println("Now merging back together...");
-//
-//        List<File> chunkFiles = new ArrayList<>();
-//        for (int i = 1; i <= 4; i++) {
-//            String chunkNum = String.format("%03d", i);
-//            chunkFiles.add(new File("C:\\Users\\Miller Ridgeway\\Desktop\\testingFile.pdf." + chunkNum));
-//        }
-//
-//        File dest = new File("Merged.pdf");
-//        dest.createNewFile();
-//        mergeChunks(chunkFiles, dest);
-
-//        System.out.println("Merge complete.");
-
         try {
             Scanner scn = new Scanner(System.in);
 
@@ -111,7 +53,7 @@ public class Client {
                         tosend = scn.nextLine();
 
                         fileToSend = new File(tosend);
-                        chunks = Client.chunkFile(fileToSend);
+                        chunks = FileChunkManager.chunkFile(fileToSend);
                         payload.put("send", Integer.toString(chunks));
                         tosend = MessageParser.mapToString("send", payload);
 
@@ -177,6 +119,7 @@ public class Client {
                                 outUpload.writeInt(ConnectionType.CLIENT_SEND.getValue());
 
                                 //Send fileChunkName to ChunkServer.ChunkServerRecv
+                                //as well as the forwarding locations
                                 String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
                                 outUpload.writeUTF(fileChunkName);
                                 outUpload.writeUTF(forwardMessage);
@@ -186,6 +129,8 @@ public class Client {
                                 byte[] buf = Files.readAllBytes(chunk.toPath());
 
                                 outUpload.write(buf);
+                                chunk.delete();
+                                
                                 disUpload.close();
                                 outUpload.close();
                             }
@@ -193,7 +138,7 @@ public class Client {
                         break;
                     case "pullFrom":
                         String[] pullServers = parser.getValue().split(",");
-                        List<File> files = new ArrayList<>();
+                        ArrayList<String> files = new ArrayList<>();
                         for (int i = 0; i < pullServers.length; i++) {
                             InetAddress ipPull = InetAddress.getByName(pullServers[i].split("_")[0]);
                             int port = Integer.parseInt(pullServers[i].split("_")[1]);
@@ -228,7 +173,7 @@ public class Client {
                                         fos.write(buf, 0, n);
                                         fileSize -= n;
                                     }
-                                    files.add(f);
+                                    files.add(f.getName());
                                     fos.close();
                                 } catch (Exception e) {
                                     System.out.println("Read all chunks.");
@@ -237,18 +182,16 @@ public class Client {
                             }
                         }
                         //Merge the file chunks into an output file once again.
-                        File merged = new File(payload.get("pull"));
-                        merged.createNewFile();
-                        mergeChunks(files, merged);
-
-                        for (File f : files) {
+                        Collections.sort(files);
+                        FileChunkManager.mergeChunks(files, payload.get("pull"));
+                        for (String fName : files) {
+                            File f = new File(fName);
                             f.delete();
                         }
                         break;
                     default:
                         System.out.println("Unknown reply from chunk server");
                         break;
-
                 }
             }
 

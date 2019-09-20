@@ -58,6 +58,7 @@ public class ChunkServer {
 
                 switch (ConnectionType.fromInteger(threadType)) {
                     case CLIENT_SEND:
+                    case CHUNK_FORWARD:
                         ChunkServerRecv recv = new ChunkServerRecv(connection, input, output);
                         recv.start();
                         break;
