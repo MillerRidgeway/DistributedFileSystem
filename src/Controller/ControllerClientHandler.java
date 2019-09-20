@@ -29,11 +29,11 @@ public class ControllerClientHandler extends Thread {
 
         }
         String list = "";
-        String toBeAdded = Controller.getChunkServer().getHostAddress();
+        String toBeAdded = Controller.getChunkServer();
 
         for (int i = 0; i < rep - 1; i++) {
             if (list.contains(toBeAdded))
-                toBeAdded = Controller.getChunkServer().getHostAddress();
+                toBeAdded = Controller.getChunkServer();
             if (i == rep - 1)
                 list += toBeAdded;
             else
@@ -76,9 +76,9 @@ public class ControllerClientHandler extends Thread {
                         String chunkServList = "";
                         for (int i = 0; i < Integer.parseInt(parser.getValue()); i++) {
                             if (i == Integer.parseInt(parser.getValue()) - 1)
-                                chunkServList += Controller.getChunkServer().getHostAddress();
+                                chunkServList += Controller.getChunkServer();
                             else
-                                chunkServList += Controller.getChunkServer().getHostAddress() + ",";
+                                chunkServList += Controller.getChunkServer() + ",";
                         }
                         payload.put("sendTo", chunkServList);
                         toreturn = MessageParser.mapToString("sendTo", payload);
@@ -103,8 +103,10 @@ public class ControllerClientHandler extends Thread {
                         boolean first = true;
                         for (String s : fileList) {
                             if (!serverList.contains(Controller.files.get(s))) {
-                                if (first)
+                                if (first) {
                                     serverList += Controller.files.get(s);
+                                    first = false;
+                                }
                                 else
                                     serverList += "," + Controller.files.get(s);
                             }

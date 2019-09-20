@@ -4,20 +4,22 @@ import Messages.ConnectionType;
 
 import java.net.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
+import java.util.*;
 
 public class Controller {
-    public static ArrayList<InetAddress> currentChunkConnections = new ArrayList<>();
+    public static ArrayList<Socket> currentChunkConnections = new ArrayList<>();
     public static ArrayList<Monitor> monitors = new ArrayList<>();
     public static Map<String, String> files = new HashMap<>();
-
-    public static InetAddress getChunkServer() throws UnknownHostException {
+    public static Map<Socket, Integer> serverPorts = new HashMap<>();
+    public static String getChunkServer() throws UnknownHostException {
         //TODO - Make method select a server at random until space becomes an issue
-        //Do this based on available space within each chunk server - for now just give a chunk server
-        return currentChunkConnections.get(0);
+        //Do this based on available space within each chunk server - for now just give a
+        //random chunk server chunk server
+        Random r = new Random();
+        int randIndex = r.nextInt(currentChunkConnections.size());
+        Socket chunkServer = currentChunkConnections.get(randIndex);
+        return chunkServer.getInetAddress().getHostAddress() + "_" +
+                serverPorts.get(chunkServer);
     }
 
     public static void addFile(String addr, String filename) {
@@ -64,12 +66,19 @@ public class Controller {
                         clientThread.start();
                         break;
                     case CHUNK:
+                        //Create a new chunk server handler thread and store the server
+                        //port reported by the chunk server client
+                        int serverPort = input.readInt();
+                        Controller.serverPorts.put(connection, serverPort);
+                        System.out.println("Newly connected chunk server port is: " + serverPort);
+
                         ControllerChunkHandler chunkThread = new ControllerChunkHandler(connection, input, output);
-                        currentChunkConnections.add(chunkThread.connection.getInetAddress());
+                        currentChunkConnections.add(chunkThread.connection);
                         chunkThread.start();
 
+
                         //Keepalive check
-                        Monitor m = new Monitor(connection.getInetAddress().getHostName(), 555);
+                        Monitor m = new Monitor(connection.getInetAddress().getHostName(), serverPort);
                         monitors.add(m);
                         statusCheck.schedule(m, 0, 10000);
 

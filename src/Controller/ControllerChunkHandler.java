@@ -53,7 +53,8 @@ public class ControllerChunkHandler extends Thread {
                             String[] files = parser.getValue().split(",");
                             System.out.println("Updating controller index with the following files: " + parser.getValue() + "\n");
                             for (int i = 0; i < files.length; i++) {
-                                Controller.addFile(files[i], connection.getInetAddress().getHostAddress());
+                                Controller.addFile(files[i], connection.getInetAddress().getHostAddress()
+                                        + "_" + Controller.serverPorts.get(connection));
                                 if (Controller.files.get(files[i]).split(",").length < 3) {
                                     System.out.println("Less than three copies of " + files[i] + " forwarding to active servers");
                                 }

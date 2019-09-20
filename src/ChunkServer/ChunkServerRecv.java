@@ -28,7 +28,7 @@ public class ChunkServerRecv extends Thread {
             //Get file from client
             int count;
             byte[] buf = new byte[64000];
-            FileOutputStream fos = new FileOutputStream("C:\\Users\\Miller Ridgeway\\Desktop\\Chunk1\\" + filename);
+            FileOutputStream fos = new FileOutputStream(ChunkServer.storageDir + filename);
             while ((count = dis.read(buf)) > 0) {
                 fos.write(buf, 0, count);
             }

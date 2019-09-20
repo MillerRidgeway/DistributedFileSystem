@@ -30,6 +30,9 @@ public class ChunkServerClient extends Thread {
             out.writeInt(ConnectionType.CHUNK.getValue());
             System.out.println("Sent connect ID type: " + ConnectionType.CHUNK);
 
+            out.writeInt(ChunkServer.serverPort);
+            System.out.println("Notified controller of active server port: " + ChunkServer.serverPort);
+
             Timer minorHeartbeat = new Timer();
             minorHeartbeat.schedule(new Heartbeat(s,out), 0, 5000);
 

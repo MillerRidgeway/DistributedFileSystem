@@ -163,11 +163,13 @@ public class Client {
                         System.out.println("Sending " + chunks + " chunks to the following: " + parser.getValue());
                         String[] sendServers = parser.getValue().split(",");
                         for (int i = 0; i < chunks; i++) {
+                            int port = Integer.parseInt(sendServers[i].split("_")[1]);
+                            String addr = sendServers[i].split("_")[0];
                             if (chunks == -1)
                                 System.out.println("Error in chunking the file - chunks =-1");
                             else {
-                                InetAddress ipUpload = InetAddress.getByName(sendServers[i]);
-                                Socket sUpload = new Socket(ipUpload, 555);
+                                InetAddress ipUpload = InetAddress.getByName(addr);
+                                Socket sUpload = new Socket(ipUpload, port);
                                 DataInputStream disUpload = new DataInputStream(sUpload.getInputStream());
                                 DataOutputStream outUpload = new DataOutputStream(sUpload.getOutputStream());
 
@@ -193,8 +195,9 @@ public class Client {
                         String[] pullServers = parser.getValue().split(",");
                         List<File> files = new ArrayList<>();
                         for (int i = 0; i < pullServers.length; i++) {
-                            InetAddress ipPull = InetAddress.getByName(pullServers[i]);
-                            Socket sPull = new Socket(ipPull, 555);
+                            InetAddress ipPull = InetAddress.getByName(pullServers[i].split("_")[0]);
+                            int port = Integer.parseInt(pullServers[i].split("_")[1]);
+                            Socket sPull = new Socket(ipPull, port);
                             DataInputStream disPull = new DataInputStream(sPull.getInputStream());
                             DataOutputStream outPull = new DataOutputStream(sPull.getOutputStream());
 
@@ -232,14 +235,14 @@ public class Client {
                                     remain = false;
                                 }
                             }
-                            //Merge the file chunks into an output file once again.
-                            File merged = new File(payload.get("pull"));
-                            merged.createNewFile();
-                            mergeChunks(files, merged);
+                        }
+                        //Merge the file chunks into an output file once again.
+                        File merged = new File(payload.get("pull"));
+                        merged.createNewFile();
+                        mergeChunks(files, merged);
 
-                            for (File f : files) {
-                                f.delete();
-                            }
+                        for (File f : files) {
+                            f.delete();
                         }
                         break;
                     default:

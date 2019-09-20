@@ -6,10 +6,14 @@ import java.net.*;
 import java.io.*;
 
 public class ChunkServer {
-
+    public static int serverPort;
+    public static String storageDir;
     public static void main(String[] args) {
         //Start ChunkServer.ChunkServerClient connection to controller - manages heartbeats
         //controller interactions, etc.
+
+        storageDir = args[0];
+        System.out.println("Storage dir is: " + storageDir);
         try {
             InetAddress ip = InetAddress.getByName("localhost");
             Socket controllerSocket = new Socket(ip, 444);
@@ -23,16 +27,15 @@ public class ChunkServer {
             System.out.println("Error connecting chunk client to controller server: " + e);
         }
 
-        //File upload server
-        final int PORT_NUMBER = 555;
 
         ServerSocket listener;
         Socket connection;
 
         //Init server socket on PORT_NUMBER
         try {
-            listener = new ServerSocket(PORT_NUMBER);
-            System.out.println("Listening on port: " + PORT_NUMBER);
+            listener = new ServerSocket(0);
+            System.out.println("Listening on port: " + listener.getLocalPort());
+            serverPort = listener.getLocalPort();
         } catch (Exception e) {
             System.out.println("ERROR: Unexpected chunk server shutdown");
             System.out.println("Error is: " + e);
@@ -64,8 +67,7 @@ public class ChunkServer {
                         break;
                 }
             } catch (Exception e) {
-                System.out.println("Error in binding / writing to chunk server socket");
-                System.out.println("Error is: " + e);
+
             }
         }
     }
