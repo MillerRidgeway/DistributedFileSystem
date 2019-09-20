@@ -30,20 +30,18 @@ public class ChunkServerForward extends Thread {
             DataInputStream dis = new DataInputStream(s.getInputStream());
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
 
-            out.writeInt(ConnectionType.CHUNK.getValue());
-            System.out.println("Sent connect ID type: " + ConnectionType.CHUNK_FORWARD);
+            out.writeInt(ConnectionType.CHUNK_FORWARD.getValue());
+            System.out.println("Sent connect ID type: " + ConnectionType.CHUNK_FORWARD + "to " + addr + "_" + port);
+            System.out.println("Forwarding " + fileName);
 
             String forwardMessage = message;
             MessageParser parseForward = new MessageParser(forwardMessage);
-            System.out.println("Parsed KV string: " + parseForward.getParsedKV());
-            System.out.println("Parsed Key: " + parseForward.getKey());
-            System.out.println("Parsed Value: " + parseForward.getValue());
-            System.out.println("");
 
             Map<String, String> modifiedForward = new HashMap<>();
             try {
-                modifiedForward.put("forwardTo", parseForward.getValue().split(",")[1]);
+                modifiedForward.put("forwardTo", parseForward.getValue().split("-")[1]);
             }catch (ArrayIndexOutOfBoundsException e){
+                System.out.println("Last forward location reached, writing null to forward chain.");
                 modifiedForward.put("forwardTo","null");
             }
             forwardMessage = MessageParser.mapToString("forwardTo", modifiedForward);
@@ -56,7 +54,6 @@ public class ChunkServerForward extends Thread {
             //Send a chunk to the chunk server
             File chunk = new File(ChunkServer.storageDir + fileName);
             byte[] buf = Files.readAllBytes(chunk.toPath());
-
             out.write(buf);
 
             // closing resources

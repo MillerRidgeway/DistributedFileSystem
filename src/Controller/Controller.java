@@ -18,6 +18,7 @@ public class Controller {
         //random chunk server chunk server
         Random r = new Random();
         int randIndex = r.nextInt(currentChunkConnections.size());
+
         Socket chunkServer = currentChunkConnections.get(randIndex);
         return chunkServer.getInetAddress().getHostAddress() + "_" +
                 serverPorts.get(chunkServer);
@@ -81,7 +82,7 @@ public class Controller {
                         //Keepalive check
                         Monitor m = new Monitor(connection.getInetAddress().getHostName(), serverPort);
                         monitors.add(m);
-                        statusCheck.schedule(m, 0, 10000);
+                        //statusCheck.schedule(m, 0, 10000);
 
                         System.out.println("Chunk servers connected: " + currentChunkConnections.size() + "\n");
                         break;

@@ -78,11 +78,8 @@ public class Client {
                         break;
                 }
 
-                //Print & process received data
-                String received = dis.readUTF();
-                System.out.println("The message from the controller was:" + received);
-
                 //Create and print the parsed message
+                String received = dis.readUTF();
                 MessageParser parser = new MessageParser(received);
                 System.out.println("Parsed KV string: " + parser.getParsedKV());
                 System.out.println("Parsed Key: " + parser.getKey());
@@ -104,6 +101,8 @@ public class Client {
                         //the controller
                         System.out.println("Sending " + chunks + " chunks to the following: " + parser.getValue());
                         String[] sendServers = parser.getValue().split(",");
+                        String[] forwardServers = parseForward.getValue().split(",");
+
                         for (int i = 0; i < chunks; i++) {
                             int port = Integer.parseInt(sendServers[i].split("_")[1]);
                             String addr = sendServers[i].split("_")[0];
@@ -122,7 +121,9 @@ public class Client {
                                 //as well as the forwarding locations
                                 String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
                                 outUpload.writeUTF(fileChunkName);
-                                outUpload.writeUTF(forwardMessage);
+
+                                payload.put("forwardTo", forwardServers[i]);
+                                outUpload.writeUTF(MessageParser.mapToString("forwardTo", payload));
 
                                 //Send a chunk to the chunk server
                                 File chunk = new File(fileToSend.getParent() + "\\" + fileChunkName);

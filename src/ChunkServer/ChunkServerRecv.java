@@ -21,16 +21,16 @@ public class ChunkServerRecv extends Thread {
         try {
             //Get the filename
             String filename = dis.readUTF();
-            System.out.println("Uploading: " + filename);
+            System.out.println("Receiving new file: " + filename);
 
             //Get the locations to forward to
             String forwardMessage = dis.readUTF();
-            System.out.println("This was the forward message from cli: "+ forwardMessage);
+            System.out.println("This was the forward message from cli: " + forwardMessage);
             MessageParser parseForward = new MessageParser(forwardMessage);
-            System.out.println("Parsed KV string: " + parseForward.getParsedKV());
-            System.out.println("Parsed Key: " + parseForward.getKey());
-            System.out.println("Parsed Value: " + parseForward.getValue());
-            System.out.println("");
+//            System.out.println("Parsed KV string: " + parseForward.getParsedKV());
+//            System.out.println("Parsed Key: " + parseForward.getKey());
+//            System.out.println("Parsed Value: " + parseForward.getValue());
+//            System.out.println("");
 
             //Get file from client
             int count;
@@ -49,14 +49,15 @@ public class ChunkServerRecv extends Thread {
             }
 
             System.out.println("Upload complete: " + filename);
-//            if(!parseForward.getValue().equals("null")) {
-//                String addrPort = parseForward.getValue().split(",")[0];
-//                String addr = addrPort.split("_")[0];
-//                int port = Integer.parseInt(addrPort.split("_")[1]);
-//
-//                ChunkServerForward forward = new ChunkServerForward(addr, port, filename, forwardMessage);
-//                forward.start();
-//            }
+            if (!parseForward.getValue().contains("null")) {
+                String addrPort = parseForward.getValue().split("-")[0];
+                String addr = addrPort.split("_")[0];
+                int port = Integer.parseInt(addrPort.split("_")[1]);
+
+
+                ChunkServerForward forward = new ChunkServerForward(addr, port, filename, forwardMessage);
+                forward.start();
+            }
 
             // closing resources
             fos.close();

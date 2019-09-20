@@ -22,27 +22,24 @@ public class ControllerClientHandler extends Thread {
         this.output = out;
     }
 
-    private String getForwardList(int rep) throws UnknownHostException {
+    private String getForwardList(int rep, String originalDestination) throws UnknownHostException {
         if (Controller.currentChunkConnections.size() < rep) {
             System.out.println("Need more than " + rep + " servers to forward");
             return "null";
-
         }
         String list = "";
         String toBeAdded = Controller.getChunkServer();
-        System.out.println("Trying to add :" + toBeAdded);
         boolean first = true;
         for (int i = 0; i < rep; i++) {
-            while (payload.get("sendTo").contains(toBeAdded)) {
-                System.out.println("Send to list is:"+ payload.get("sendTo"));
+            while (toBeAdded.equals(originalDestination) || list.contains(toBeAdded)) {
+                System.out.println("Finding new forward addr");
                 toBeAdded = Controller.getChunkServer();
-                System.out.println("Trying to add:" + toBeAdded);
             }
             if (first) {
                 list += toBeAdded;
                 first = false;
             } else
-                list += "," + toBeAdded;
+                list += "-" + toBeAdded;
         }
         return list;
     }
@@ -79,21 +76,26 @@ public class ControllerClientHandler extends Thread {
                 switch (parser.getKey()) {
                     case "send":
                         String chunkServList = "";
+                        String forwardList = "";
                         for (int i = 0; i < Integer.parseInt(parser.getValue()); i++) {
-                            if (i == Integer.parseInt(parser.getValue()) - 1)
-                                chunkServList += Controller.getChunkServer();
-                            else
-                                chunkServList += Controller.getChunkServer() + ",";
+                            String toBeAdded = Controller.getChunkServer();
+                            if (i == Integer.parseInt(parser.getValue()) - 1) {
+                                chunkServList += toBeAdded;
+                                forwardList += getForwardList(2, toBeAdded);
+                            } else {
+                                chunkServList += toBeAdded + ",";
+                                forwardList += getForwardList(2, toBeAdded) + ",";
+                            }
                         }
                         payload.put("sendTo", chunkServList);
                         toreturn = MessageParser.mapToString("sendTo", payload);
                         output.writeUTF(toreturn);
-                        System.out.println("Replied with sendTo" + "\n");
+                        System.out.println("Replied with sendTo");
 
-                        payload.put("forwardTo", getForwardList(2));
+                        payload.put("forwardTo", forwardList);
                         toreturn = MessageParser.mapToString("forwardTo", payload);
                         output.writeUTF(toreturn);
-                        System.out.println("Replied with forwardTo");
+                        System.out.println("Replied with forwardTo" + "\n");
 
                         break;
                     case "pull":
