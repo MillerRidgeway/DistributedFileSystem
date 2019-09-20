@@ -11,6 +11,7 @@ public class Controller {
     public static ArrayList<Monitor> monitors = new ArrayList<>();
     public static Map<String, String> files = new HashMap<>();
     public static Map<Socket, Integer> serverPorts = new HashMap<>();
+
     public static String getChunkServer() throws UnknownHostException {
         //TODO - Make method select a server at random until space becomes an issue
         //Do this based on available space within each chunk server - for now just give a

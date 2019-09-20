@@ -130,7 +130,7 @@ public class Client {
 
                                 outUpload.write(buf);
                                 chunk.delete();
-                                
+
                                 disUpload.close();
                                 outUpload.close();
                             }

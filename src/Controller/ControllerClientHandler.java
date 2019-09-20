@@ -30,14 +30,19 @@ public class ControllerClientHandler extends Thread {
         }
         String list = "";
         String toBeAdded = Controller.getChunkServer();
-
-        for (int i = 0; i < rep - 1; i++) {
-            if (list.contains(toBeAdded))
+        System.out.println("Trying to add :" + toBeAdded);
+        boolean first = true;
+        for (int i = 0; i < rep; i++) {
+            while (payload.get("sendTo").contains(toBeAdded)) {
+                System.out.println("Send to list is:"+ payload.get("sendTo"));
                 toBeAdded = Controller.getChunkServer();
-            if (i == rep - 1)
+                System.out.println("Trying to add:" + toBeAdded);
+            }
+            if (first) {
                 list += toBeAdded;
-            else
-                list += toBeAdded + ",";
+                first = false;
+            } else
+                list += "," + toBeAdded;
         }
         return list;
     }
@@ -106,8 +111,7 @@ public class ControllerClientHandler extends Thread {
                                 if (first) {
                                     serverList += Controller.files.get(s);
                                     first = false;
-                                }
-                                else
+                                } else
                                     serverList += "," + Controller.files.get(s);
                             }
                         }
