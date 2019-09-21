@@ -9,6 +9,7 @@ import java.util.*;
 public class Controller {
     public static ArrayList<Socket> currentChunkConnections = new ArrayList<>();
     public static Map<String, String> files = new TreeMap<>();
+    public static Map<String, String> servers = new HashMap<>();
     public static Map<Socket, Integer> serverPorts = new HashMap<>();
 
     static String getChunkServer() throws UnknownHostException {
@@ -26,11 +27,21 @@ public class Controller {
     }
 
     static void addFile(String filename, String addr) {
-        if (files.get(filename) == null) {
-            files.put(filename, addr);
-        } else {
-            String addrList = files.get(filename);
-            files.put(filename, addrList + "," + addr);
+        synchronized (files) {
+            if (files.get(filename) == null) {
+                files.put(filename, addr);
+            } else {
+                String addrList = files.get(filename);
+                files.put(filename, addrList + "," + addr);
+            }
+        }
+        synchronized (servers) {
+            if (servers.get(addr) == null) {
+                servers.put(addr, filename);
+            } else {
+                String fileList = servers.get(addr);
+                servers.put(addr, fileList + "," + filename);
+            }
         }
     }
 
@@ -82,9 +93,11 @@ public class Controller {
                         Controller.serverPorts.put(connection, serverPort);
                         System.out.println("Newly connected chunk server port is: " + serverPort);
 
-                        ControllerChunkHandler chunkThread = new ControllerChunkHandler(connection, input, output);
-                        currentChunkConnections.add(chunkThread.connection);
-                        chunkThread.start();
+                        synchronized (currentChunkConnections) {
+                            ControllerChunkHandler chunkThread = new ControllerChunkHandler(connection, input, output);
+                            currentChunkConnections.add(chunkThread.connection);
+                            chunkThread.start();
+                        }
 
                         //Keepalive monitor
                         Monitor m = new Monitor(connection.getInetAddress().getHostName(), serverPort);

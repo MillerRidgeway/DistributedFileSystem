@@ -1,12 +1,8 @@
 package Controller;
 
-import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Random;
 import java.util.TimerTask;
 
 public class Monitor extends TimerTask {
@@ -40,35 +36,51 @@ public class Monitor extends TimerTask {
                     if (s.getInetAddress().getHostAddress().equals(addr) && Controller.serverPorts.get(s) == port) {
                         Controller.currentChunkConnections.remove(s);
                         System.out.println("Removed " + addr + "_" + port + " from chunk connections." +
-                                "Current connected servers: " + Controller.currentChunkConnections.size());
+                                "Current connected servers: " + Controller.currentChunkConnections.size() + "\n");
+                        break;
                     }
                 }
             }
 
-            //Create an index of files and servers to get them at
-            //these files must also have been present on the failed server
-            ArrayList<String> forwardFromList = new ArrayList<>();
-            ArrayList<String> files = new ArrayList<>();
 
-            for (Map.Entry<String, String> entry : Controller.files.entrySet()) {
-                if (entry.getValue().contains(addr + "_" + port)) {
-                    entry.getValue().replace(addr + "_" + port, "");
-                    System.out.println("New entry in file list is: " + entry.getValue());
-
-                    forwardFromList.add(entry.getValue());
-                    files.add(entry.getKey());
+            if (Controller.servers.get(addr + "_" + port) != null) {
+                String[] files = Controller.servers.get(addr + "_" + port).split(",");
+                synchronized (Controller.files) {
+                    //Update the file:server map and the server:file map to reflect the downed server
+                    for (String file : files) {
+                        String[] fileToServers = Controller.files.get(file).split(",");
+                        String newFileToServers = "";
+                        boolean first = true;
+                        for (int i = 0; i < fileToServers.length; i++) {
+                            if (fileToServers[i].contains(addr + "_" + port)) {
+                                fileToServers[i] = "";
+                            }
+                            if (first && !fileToServers[i].equals("")) {
+                                newFileToServers += fileToServers[i];
+                                first = false;
+                            } else if (!fileToServers[i].equals("")) {
+                                newFileToServers += "," + fileToServers[i];
+                            }
+                        }
+                        System.out.println("New entry for file " + file + " is: " + newFileToServers);
+                    }
                 }
-            }
+                synchronized (Controller.servers) {
+                    Controller.servers.remove(addr + "_" + port);
+                }
 
-            //Create forwardTo requests which are servers that don't already
-            //have copies of the given file
-//            for (int i = 0; i < files.size(); i++) {
-//                try {
-//                    String destination = ControllerClientHandler.getForwardList(1, forwardFromList.get(i));
-//                } catch (UnknownHostException ex) {
-//                    ex.printStackTrace();
-//                }
-//            }
+                //Create forwardTo requests which are servers that don't already
+                //have copies of the given file
+                for (int i = 0; i < files.length; i++) {
+                    try {
+                        String destination = ControllerClientHandler.getForwardList(1, Controller.files.get(files[i]));
+                        System.out.println("Destination is: " + destination);
+                    } catch (UnknownHostException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            } else
+                System.out.println("No files stored at this server.");
         }
     }
 }
