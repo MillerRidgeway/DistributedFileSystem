@@ -9,10 +9,10 @@ import java.util.*;
 public class Controller {
     public static ArrayList<Socket> currentChunkConnections = new ArrayList<>();
     public static ArrayList<Monitor> monitors = new ArrayList<>();
-    public static Map<String, String> files = new HashMap<>();
+    public static Map<String, String> files = new TreeMap<>();
     public static Map<Socket, Integer> serverPorts = new HashMap<>();
 
-    public static String getChunkServer() throws UnknownHostException {
+    static String getChunkServer() throws UnknownHostException {
         //TODO - Make method select a server at random until space becomes an issue
         //Do this based on available space within each chunk server - for now just give a
         //random chunk server chunk server
@@ -24,8 +24,14 @@ public class Controller {
                 serverPorts.get(chunkServer);
     }
 
-    public static void addFile(String addr, String filename) {
-        files.merge(addr, filename, (a, b) -> a + "," + b);
+    static void addFile(String filename, String addr) {
+        if(files.get(filename) == null){
+            files.put(filename, addr);
+        }
+        else{
+            String addrList = files.get(filename);
+            files.put(filename, addrList + "," + addr);
+        }
     }
 
     public static void main(String[] args) {

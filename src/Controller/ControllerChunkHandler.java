@@ -43,15 +43,16 @@ public class ControllerChunkHandler extends Thread {
                 // answer from the client
                 //Create and print the parsed message
                 MessageParser parser = new MessageParser(received);
-                System.out.println("Parsed KV string: " + parser.getParsedKV());
-                System.out.println("Parsed Key: " + parser.getKey());
-                System.out.println("Parsed Value: " + parser.getValue() + "\n");
+//                System.out.println("Parsed KV string: " + parser.getParsedKV());
+//                System.out.println("Parsed Key: " + parser.getKey());
+//                System.out.println("Parsed Value: " + parser.getValue() + "\n");
 
                 switch (parser.getKey()) {
                     case "minorHeartbeat":
                         if (!parser.getValue().equals("null")) {
                             String[] files = parser.getValue().split(",");
-                            System.out.println("Updating controller index with the following files: " + parser.getValue() + "\n");
+                            System.out.println("New files at: " + connection.getInetAddress().getHostAddress() + "_" + connection.getPort());
+                            System.out.println("Updating controller index with the following files: " + parser.getValue());
                             synchronized (Controller.files) {
                                 for (int i = 0; i < files.length; i++) {
                                     Controller.addFile(files[i], connection.getInetAddress().getHostAddress()

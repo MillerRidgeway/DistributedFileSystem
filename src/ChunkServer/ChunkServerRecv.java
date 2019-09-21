@@ -25,7 +25,6 @@ public class ChunkServerRecv extends Thread {
 
             //Get the locations to forward to
             String forwardMessage = dis.readUTF();
-            System.out.println("This was the forward message from cli: " + forwardMessage);
             MessageParser parseForward = new MessageParser(forwardMessage);
 //            System.out.println("Parsed KV string: " + parseForward.getParsedKV());
 //            System.out.println("Parsed Key: " + parseForward.getKey());

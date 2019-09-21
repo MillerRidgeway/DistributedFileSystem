@@ -24,33 +24,13 @@ public class ChunkServerPush extends Thread {
             String filename = dis.readUTF();
             System.out.println("Searching for " + filename);
 
-            //Array of chunks that match the filename on this server
-            File dir = new File(ChunkServer.storageDir);
-            File[] foundFiles = dir.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.startsWith(filename);
-                }
-            });
+            //Send a chunk to the chunk server
+            File chunk = new File(ChunkServer.storageDir + filename);
+            byte[] buf = Files.readAllBytes(chunk.toPath());
 
-            //Send the number of chunks on this server
-            out.writeInt(foundFiles.length);
-            out.flush();
+            out.write(buf);
 
-            //Send the file names, length, and content
-            int n = 0;
-            byte[] buf = new byte[64000 * foundFiles.length];
-            for (File f : foundFiles) {
-                out.writeUTF(f.getName());
-                out.writeLong(f.length());
-
-                FileInputStream fis = new FileInputStream(f);
-                while ((n = fis.read(buf)) != -1) {
-                    out.write(buf, 0, n);
-                    out.flush();
-                }
-
-            }
-            System.out.println("Sent " + foundFiles.length + " chunks of the file " + filename);
+            System.out.println("Sent " + filename);
 
             dis.close();
             out.close();

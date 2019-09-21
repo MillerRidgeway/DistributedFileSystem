@@ -1,5 +1,6 @@
 package Client;
 
+import ChunkServer.ChunkServer;
 import Messages.ConnectionType;
 import Messages.MessageParser;
 
@@ -138,60 +139,52 @@ public class Client {
                         }
                         break;
                     case "pullFrom":
-                        String[] pullServers = parser.getValue().split(",");
-                        ArrayList<String> files = new ArrayList<>();
-                        for (int i = 0; i < pullServers.length; i++) {
-                            InetAddress ipPull = InetAddress.getByName(pullServers[i].split("_")[0]);
-                            int port = Integer.parseInt(pullServers[i].split("_")[1]);
+                        String fileListMessage = dis.readUTF();
+                        MessageParser parsedFileList = new MessageParser(fileListMessage);
+                        System.out.println("Parsed KV string: " + parsedFileList.getParsedKV());
+                        System.out.println("Parsed Key: " + parsedFileList.getKey());
+                        System.out.println("Parsed Value: " + parsedFileList.getValue());
+                        System.out.println("");
+
+                        String[] fileList = parsedFileList.getValue().split(",");
+                        String[] serverList = parser.getValue().split(",");
+                        ArrayList<String> filesToMerge = new ArrayList<>();
+
+                        for (int i = 0; i < serverList.length; i++) {
+                            InetAddress ipPull = InetAddress.getByName(serverList[i].split("_")[0]);
+                            int port = Integer.parseInt(serverList[i].split("_")[1]);
                             Socket sPull = new Socket(ipPull, port);
                             DataInputStream disPull = new DataInputStream(sPull.getInputStream());
                             DataOutputStream outPull = new DataOutputStream(sPull.getOutputStream());
 
+                            System.out.println("Getting file " + fileList[i] +
+                                    " from " + serverList[i]);
+
                             //Send connection type and name of file to search for
                             outPull.writeInt(ConnectionType.CLIENT_PULL.getValue());
-                            outPull.writeUTF(payload.get("pull"));
+                            outPull.writeUTF(fileList[i]);
 
-                            //Read in the chunks available on a given server
-                            int numChunks = disPull.readInt();
-                            System.out.println("This file has " + numChunks + " pieces at " + pullServers[i]);
-                            byte[] buf = new byte[64000 * numChunks];
-                            int n = 0;
-                            boolean remain = true;
-                            while (remain) {
-                                try {
-                                    //Read the file name and size first
-                                    String filename = disPull.readUTF();
-                                    long fileSize = disPull.readLong();
-
-                                    //Create a new file for the output stream to write to
-                                    File f = new File(filename);
-                                    f.createNewFile();
-                                    FileOutputStream fos = new FileOutputStream(f);
-                                    System.out.println("File to read is: " + filename + "," + fileSize);
-
-                                    //Now read the contents of the file, looping at each new file
-                                    while (fileSize > 0 && (n = disPull.read(buf, 0, (int) Math.min(buf.length, fileSize))) != -1) {
-                                        fos.write(buf, 0, n);
-                                        fileSize -= n;
-                                    }
-                                    files.add(f.getName());
-                                    fos.close();
-                                } catch (Exception e) {
-                                    System.out.println("Read all chunks.");
-                                    remain = false;
-                                }
+                            //Get file from chunk server
+                            int count;
+                            byte[] buf = new byte[64000];
+                            FileOutputStream fos = new FileOutputStream(fileList[i]);
+                            while ((count = disPull.read(buf)) > 0) {
+                                fos.write(buf, 0, count);
                             }
+                            filesToMerge.add(fileList[i]);
                         }
+
                         //Merge the file chunks into an output file once again.
-                        Collections.sort(files);
-                        FileChunkManager.mergeChunks(files, payload.get("pull"));
-                        for (String fName : files) {
+                        Collections.sort(filesToMerge);
+                        FileChunkManager.mergeChunks(filesToMerge, payload.get("pull"));
+
+                        for (String fName : filesToMerge) {
                             File f = new File(fName);
                             f.delete();
                         }
                         break;
                     default:
-                        System.out.println("Unknown reply from chunk server");
+                        System.out.println("Unknown reply from controller");
                         break;
                 }
             }

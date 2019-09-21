@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -99,29 +100,37 @@ public class ControllerClientHandler extends Thread {
 
                         break;
                     case "pull":
-                        System.out.println("Length of file list is:" + Controller.files.size());
                         String filename = parser.getValue();
-                        Set<String> fileList = Controller.files.keySet()
-                                .stream()
-                                .filter(s -> s.startsWith(filename))
-                                .collect(Collectors.toSet());
 
+                        String fileList = "";
                         String serverList = "";
                         boolean first = true;
-                        for (String s : fileList) {
-                            if (!serverList.contains(Controller.files.get(s))) {
+                        for (Map.Entry<String, String> e : Controller.files.entrySet()) {
+                            if (e.getKey().contains(filename)) {
+                                String[] serversPerFile = e.getValue().split(",");
+                                Random r = new Random();
+                                String server = serversPerFile[r.nextInt(serversPerFile.length)];
+
                                 if (first) {
-                                    serverList += Controller.files.get(s);
+                                    serverList += server;
+                                    fileList += e.getKey();
                                     first = false;
-                                } else
-                                    serverList += "," + Controller.files.get(s);
+                                } else {
+                                    serverList += "," + server;
+                                    fileList += "," + e.getKey();
+                                }
                             }
                         }
-
                         payload.put("pullFrom", serverList);
                         toreturn = MessageParser.mapToString("pullFrom", payload);
                         output.writeUTF(toreturn);
                         System.out.println("Replied with pullFrom" + "\n");
+
+                        payload.put("fileList", fileList);
+                        toreturn = MessageParser.mapToString("fileList", payload);
+                        output.writeUTF(toreturn);
+                        System.out.println("Replied with fileList" + "\n");
+
                         break;
                     default:
                         output.writeUTF("Invalid input");
