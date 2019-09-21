@@ -17,32 +17,34 @@ public class ControllerClientHandler extends Thread {
 
     Map<String, String> payload = new HashMap<>();
 
-    public ControllerClientHandler(Socket s, DataInputStream in, DataOutputStream out) {
+    ControllerClientHandler(Socket s, DataInputStream in, DataOutputStream out) {
         this.connection = s;
         this.input = in;
         this.output = out;
     }
 
-    private String getForwardList(int rep, String originalDestination) throws UnknownHostException {
-        if (Controller.currentChunkConnections.size() < rep) {
-            System.out.println("Need more than " + rep + " servers to forward");
-            return "null";
-        }
-        String list = "";
-        String toBeAdded = Controller.getChunkServer();
-        boolean first = true;
-        for (int i = 0; i < rep; i++) {
-            while (toBeAdded.equals(originalDestination) || list.contains(toBeAdded)) {
-                System.out.println("Finding new forward addr");
-                toBeAdded = Controller.getChunkServer();
+    static String getForwardList(int rep, String originalDestination) throws UnknownHostException {
+        synchronized (Controller.currentChunkConnections) {
+            if (Controller.currentChunkConnections.size() < rep) {
+                System.out.println("Need more than " + rep + " servers to forward");
+                return "null";
             }
-            if (first) {
-                list += toBeAdded;
-                first = false;
-            } else
-                list += "-" + toBeAdded;
+            String list = "";
+            String toBeAdded = Controller.getChunkServer();
+            boolean first = true;
+            for (int i = 0; i < rep; i++) {
+                while (originalDestination.contains(toBeAdded) || list.contains(toBeAdded)) {
+                    System.out.println("Finding new forward addr");
+                    toBeAdded = Controller.getChunkServer();
+                }
+                if (first) {
+                    list += toBeAdded;
+                    first = false;
+                } else
+                    list += "-" + toBeAdded;
+            }
+            return list;
         }
-        return list;
     }
 
     @Override

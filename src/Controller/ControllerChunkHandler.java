@@ -67,7 +67,8 @@ public class ControllerChunkHandler extends Thread {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("May have lost a connection to a chunk server");
+            System.out.println("Error message is: " + e);
         }
     }
 

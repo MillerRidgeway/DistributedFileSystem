@@ -8,27 +8,27 @@ import java.util.*;
 
 public class Controller {
     public static ArrayList<Socket> currentChunkConnections = new ArrayList<>();
-    public static ArrayList<Monitor> monitors = new ArrayList<>();
     public static Map<String, String> files = new TreeMap<>();
     public static Map<Socket, Integer> serverPorts = new HashMap<>();
 
     static String getChunkServer() throws UnknownHostException {
-        //TODO - Make method select a server at random until space becomes an issue
-        //Do this based on available space within each chunk server - for now just give a
-        //random chunk server chunk server
-        Random r = new Random();
-        int randIndex = r.nextInt(currentChunkConnections.size());
+        synchronized (currentChunkConnections) {
+            //TODO - Make method select a server at random until space becomes an issue
+            //Do this based on available space within each chunk server - for now just give a
+            //random chunk server
+            Random r = new Random();
+            int randIndex = r.nextInt(currentChunkConnections.size());
 
-        Socket chunkServer = currentChunkConnections.get(randIndex);
-        return chunkServer.getInetAddress().getHostAddress() + "_" +
-                serverPorts.get(chunkServer);
+            Socket chunkServer = currentChunkConnections.get(randIndex);
+            return chunkServer.getInetAddress().getHostAddress() + "_" +
+                    serverPorts.get(chunkServer);
+        }
     }
 
     static void addFile(String filename, String addr) {
-        if(files.get(filename) == null){
+        if (files.get(filename) == null) {
             files.put(filename, addr);
-        }
-        else{
+        } else {
             String addrList = files.get(filename);
             files.put(filename, addrList + "," + addr);
         }
@@ -70,12 +70,14 @@ public class Controller {
                 //New connection thread based on connection type
                 switch (ConnectionType.fromInteger(threadType)) {
                     case CLIENT:
+                        System.out.println("\n");
                         Thread clientThread = new ControllerClientHandler(connection, input, output);
                         clientThread.start();
                         break;
                     case CHUNK:
                         //Create a new chunk server handler thread and store the server
-                        //port reported by the chunk server client
+                        //port reported by the chunk server client (different from the)
+                        //client port
                         int serverPort = input.readInt();
                         Controller.serverPorts.put(connection, serverPort);
                         System.out.println("Newly connected chunk server port is: " + serverPort);
@@ -84,11 +86,9 @@ public class Controller {
                         currentChunkConnections.add(chunkThread.connection);
                         chunkThread.start();
 
-
-                        //Keepalive check
+                        //Keepalive monitor
                         Monitor m = new Monitor(connection.getInetAddress().getHostName(), serverPort);
-                        monitors.add(m);
-                        //statusCheck.schedule(m, 0, 10000);
+                        statusCheck.schedule(m, 0, 10000);
 
                         System.out.println("Chunk servers connected: " + currentChunkConnections.size() + "\n");
                         break;
