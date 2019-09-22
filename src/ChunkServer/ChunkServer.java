@@ -1,6 +1,7 @@
 package ChunkServer;
 
 import Messages.ConnectionType;
+import Messages.MessageParser;
 
 import java.net.*;
 import java.io.*;
@@ -8,6 +9,7 @@ import java.io.*;
 public class ChunkServer {
     public static int serverPort;
     public static String storageDir;
+
     public static void main(String[] args) {
         //Start ChunkServer.ChunkServerClient connection to controller - manages heartbeats
         //controller interactions, etc.
@@ -65,6 +67,18 @@ public class ChunkServer {
                     case CLIENT_PULL:
                         ChunkServerPush push = new ChunkServerPush(connection, input, output);
                         push.start();
+                        break;
+                    case FORWARD_TO:
+                        String message = input.readUTF();
+                        System.out.println("Message is: " + message);
+                        MessageParser parsedInput = new MessageParser(message);
+                        String filename = input.readUTF();
+                        System.out.println("Filename is: " + filename);
+                        String addr = parsedInput.getValue().split("_")[0];
+                        int port = Integer.parseInt(parsedInput.getValue().split("_")[1]);
+
+                        ChunkServerForward pushForward = new ChunkServerForward(addr, port, filename, message);
+                        pushForward.start();
                         break;
                 }
             } catch (Exception e) {

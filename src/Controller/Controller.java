@@ -14,7 +14,7 @@ public class Controller {
 
     static String getChunkServer() throws UnknownHostException {
         synchronized (currentChunkConnections) {
-            //TODO - Make method select a server at random until space becomes an issue
+            //TODO - Account for space remaining at each server
             //Do this based on available space within each chunk server - for now just give a
             //random chunk server
             Random r = new Random();

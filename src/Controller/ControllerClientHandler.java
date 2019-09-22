@@ -34,7 +34,7 @@ public class ControllerClientHandler extends Thread {
             boolean first = true;
             for (int i = 0; i < forwardCount; i++) {
                 while (alreadyAtList.contains(toBeAdded) || list.contains(toBeAdded)) {
-                    System.out.println("Finding new forward addr");
+                    //System.out.println("Finding new forward addr");
                     toBeAdded = Controller.getChunkServer();
                 }
                 if (first) {

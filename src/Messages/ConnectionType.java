@@ -1,7 +1,7 @@
 package Messages;
 
 public enum ConnectionType {
-    CHUNK(100), CLIENT(200), CLIENT_SEND(300), CLIENT_PULL(400), CHUNK_FORWARD(500);
+    CHUNK(100), CLIENT(200), CLIENT_SEND(300), CLIENT_PULL(400), CHUNK_FORWARD(500), FORWARD_TO(600);
 
     private final int value;
 
@@ -25,6 +25,8 @@ public enum ConnectionType {
                 return CLIENT_PULL;
             case 500:
                 return CHUNK_FORWARD;
+            case 600:
+                return FORWARD_TO;
         }
         return null;
     }
