@@ -38,7 +38,7 @@ public class FileChunkManager {
 
     public static void mergeChunks(ArrayList<String> fNames, String dest) throws IOException {
         Path outFile = Paths.get(dest);
-        System.out.println("TO " + outFile);
+        System.out.println("Merging chunks back into file:  " + outFile);
         try (FileChannel out = FileChannel.open(outFile, CREATE, WRITE)) {
             for (int i = 0, n = fNames.size(); i < n; i++) {
                 Path inFile = Paths.get(fNames.get(i));
@@ -49,6 +49,6 @@ public class FileChunkManager {
                 }
             }
         }
-        System.out.println("DONE.");
+        System.out.println("Done merging.");
     }
 }
