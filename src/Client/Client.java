@@ -3,6 +3,7 @@ package Client;
 import ChunkServer.ChunkServer;
 import Messages.ConnectionType;
 import Messages.MessageParser;
+import com.sun.source.tree.CatchTree;
 
 import java.io.*;
 import java.net.*;
@@ -38,45 +39,50 @@ public class Client {
             // information between client and Controller.Controller Client.Client Handler class
             net_recv:
             while (true) {
-                System.out.println(dis.readUTF());
-                String tosend = scn.nextLine();
+                System.out.println("What do you want? [Send | Pull | Exit]");
 
-                //Parse the command and then take the appropriate action
-                switch (tosend.toLowerCase()) {
-                    case "exit":
-                        System.out.println("Closing this connection : " + s);
-                        s.close();
-                        System.out.println("Connection closed");
-                        break net_recv;
+                boolean isNotValid = true;
+                while(isNotValid) {
+                    //Parse the command and then take the appropriate action
+                    String tosend = scn.nextLine();
+                    switch (tosend.toLowerCase()) {
+                        case "exit":
+                            System.out.println("Closing this connection : " + s);
+                            s.close();
+                            System.out.println("Connection closed");
+                            break net_recv;
 
-                    case "send":
-                        System.out.println("Please input filename to send: ");
-                        tosend = scn.nextLine();
+                        case "send":
+                            System.out.println("Please input filename to send: ");
+                            tosend = scn.nextLine();
 
-                        fileToSend = new File(tosend);
-                        chunks = FileChunkManager.chunkFile(fileToSend);
-                        payload.put("send", Integer.toString(chunks));
-                        tosend = MessageParser.mapToString("send", payload);
+                            fileToSend = new File(tosend);
+                            chunks = FileChunkManager.chunkFile(fileToSend);
+                            payload.put("send", Integer.toString(chunks));
+                            tosend = MessageParser.mapToString("send", payload);
 
-                        out.writeUTF(tosend);
-                        break;
+                            out.writeUTF(tosend);
+                            isNotValid = false;
+                            break;
 
-                    case "pull":
-                        System.out.println("Please input filename to pull: ");
-                        tosend = scn.nextLine();
+                        case "pull":
+                            System.out.println("Please input filename to pull: ");
+                            tosend = scn.nextLine();
 
-                        payload.put("pull", tosend);
-                        tosend = MessageParser.mapToString("pull", payload);
+                            payload.put("pull", tosend);
+                            tosend = MessageParser.mapToString("pull", payload);
 
-                        System.out.println("Sending " + tosend);
+                            System.out.println("Sending " + tosend);
 
-                        out.writeUTF(tosend);
-                        break;
+                            out.writeUTF(tosend);
+                            isNotValid = false;
+                            break;
 
-                    default:
-                        System.out.println("Unrecognized command " + tosend);
-                        System.out.println("Please try again: [Send | Pull | Exit]");
-                        break;
+                        default:
+                            System.out.println("Unrecognized command " + tosend);
+                            System.out.println("Please try again: [Send | Pull | Exit]");
+                            break;
+                    }
                 }
 
                 //Create and print the parsed message
@@ -168,13 +174,33 @@ public class Client {
                             int count;
                             byte[] buf = new byte[64000];
                             FileOutputStream fos = new FileOutputStream(fileList[i]);
+
                             while ((count = disPull.read(buf)) > 0) {
                                 fos.write(buf, 0, count);
                             }
+
                             filesToMerge.add(fileList[i]);
                         }
 
                         //Merge the file chunks into an output file once again.
+                        //May find a corrupted chunk, if we do report the corrupted
+                        //chunk to the controller
+                        boolean noCorruptedChunks = true;
+                        for (int i = 0; i < filesToMerge.size(); i++) {
+                            File f = new File(filesToMerge.get(i));
+                            if (f.length() == 0) {
+                                noCorruptedChunks = false;
+                                System.out.println("File chunk " + f + " is corrupted.");
+                                payload.put("corruptChunkFound", filesToMerge.get(i) + "," + serverList[i]);
+                                out.writeUTF(MessageParser.mapToString("corruptChunkFound", payload));
+                            }
+                        }
+                        if (!noCorruptedChunks) {
+                            System.out.println("File you downloaded has corrupted chunk(s). " +
+                                    "Please attempt to re-download the file");
+                            break;
+                        }
+
                         Collections.sort(filesToMerge);
                         FileChunkManager.mergeChunks(filesToMerge, payload.get("pull"));
 

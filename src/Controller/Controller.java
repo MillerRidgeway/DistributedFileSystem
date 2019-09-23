@@ -7,10 +7,10 @@ import java.io.*;
 import java.util.*;
 
 public class Controller {
-    public static ArrayList<Socket> currentChunkConnections = new ArrayList<>();
-    public static Map<String, String> files = new TreeMap<>();
-    public static Map<String, String> servers = new HashMap<>();
-    public static Map<Socket, Integer> serverPorts = new HashMap<>();
+    public static final ArrayList<Socket> currentChunkConnections = new ArrayList<>();
+    public static final Map<String, String> files = new TreeMap<>();
+    public static final Map<String, String> servers = new HashMap<>();
+    public static final Map<Socket, Integer> serverPorts = new HashMap<>();
 
     static String getChunkServer() throws UnknownHostException {
         synchronized (currentChunkConnections) {

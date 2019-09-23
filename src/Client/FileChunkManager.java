@@ -2,6 +2,7 @@ package Client;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -38,14 +39,16 @@ public class FileChunkManager {
 
     public static void mergeChunks(ArrayList<String> fNames, String dest) throws IOException {
         Path outFile = Paths.get(dest);
-        System.out.println("Merging chunks back into file:  " + outFile);
+        System.out.println("Merging chunks back into file: " + outFile);
         try (FileChannel out = FileChannel.open(outFile, CREATE, WRITE)) {
-            for (int i = 0, n = fNames.size(); i < n; i++) {
+            for (int i = 0, size = fNames.size(); i < size; i++) {
                 Path inFile = Paths.get(fNames.get(i));
+                if (Files.size(inFile) == 0)
+                    throw new IOException("Chunk " + fNames.get(i) + " corrupted. ");
                 System.out.println(inFile + "...");
                 try (FileChannel in = FileChannel.open(inFile, READ)) {
-                    for (long p = 0, l = in.size(); p < l; )
-                        p += in.transferTo(p, l - p, out);
+                    for (long j = 0, size2 = in.size(); j < size2; )
+                        j += in.transferTo(j, size2 - j, out);
                 }
             }
         }

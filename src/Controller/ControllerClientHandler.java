@@ -1,5 +1,6 @@
 package Controller;
 
+import Messages.ConnectionType;
 import Messages.MessageParser;
 
 import java.io.*;
@@ -55,7 +56,7 @@ public class ControllerClientHandler extends Thread {
         try {
             while (true) {
                 // Ask user what he wants
-                output.writeUTF("What do you want? [Send | Pull | Exit]..\n");
+//                output.writeUTF("What do you want? [Send | Pull | Exit]..\n");
 
                 // receive the answer from client
                 received = input.readUTF();
@@ -132,6 +133,38 @@ public class ControllerClientHandler extends Thread {
                         toreturn = MessageParser.mapToString("fileList", payload);
                         output.writeUTF(toreturn);
                         System.out.println("Replied with fileList" + "\n");
+
+                        break;
+                    case "corruptChunkFound":
+                        String corruptFileName = "";
+                        String corruptServer = "";
+                        String[] serversWithFile = null;
+                        synchronized (Controller.files) {
+                            corruptFileName = parser.getValue().split(",")[0];
+                            corruptServer = parser.getValue().split(",")[1];
+                            serversWithFile = Controller.files.get(corruptFileName).split(",");
+                            payload.put("forwardTo", corruptServer);
+                        }
+
+                        System.out.println("Found corrupt chunk at:" + corruptServer);
+
+                        Random r = new Random();
+                        String sendFromServer = serversWithFile[r.nextInt(serversWithFile.length)];
+                        while (sendFromServer.equals(corruptServer)) {
+                            sendFromServer = serversWithFile[r.nextInt(serversWithFile.length)];
+                        }
+
+                        String addr = sendFromServer.split("_")[0];
+                        int port = Integer.parseInt(sendFromServer.split("_")[1]);
+                        System.out.println("Sending forwardTo request to: " + sendFromServer + "\n");
+
+                        Socket s = new Socket(addr, port);
+                        DataOutputStream out = new DataOutputStream(s.getOutputStream());
+                        out.writeInt(ConnectionType.FORWARD_TO.getValue());
+                        out.writeUTF(MessageParser.mapToString("forwardTo", payload));
+                        out.writeUTF(corruptFileName);
+                        s.close();
+
 
                         break;
                     default:

@@ -3,24 +3,22 @@ package ChunkServer;
 import Messages.ConnectionType;
 
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 import java.io.*;
-import java.util.Timer;
 
 public class ChunkServerClient extends Thread {
     final Socket s;
     final DataInputStream dis;
     final DataOutputStream out;
-    public static final ArrayList<String> files = new ArrayList<>();
-    public static final ArrayList<String> newFiles = new ArrayList<>();
+    static final ArrayList<String> files = new ArrayList<>();
+    static final ArrayList<String> newFiles = new ArrayList<>();
+    static final Map<String, String> fileHashes = new HashMap<>();
 
     public ChunkServerClient(Socket s, DataInputStream dis, DataOutputStream out) {
         this.s = s;
         this.dis = dis;
         this.out = out;
     }
-
 
     @Override
     public void run() {
@@ -34,7 +32,7 @@ public class ChunkServerClient extends Thread {
             System.out.println("Notified controller of active server port: " + ChunkServer.serverPort);
 
             Timer minorHeartbeat = new Timer();
-            minorHeartbeat.schedule(new Heartbeat(s,out), 0, 5000);
+            minorHeartbeat.schedule(new Heartbeat(s, out), 0, 5000);
 
             // the following loop performs the exchange of
             // information between client and client handler

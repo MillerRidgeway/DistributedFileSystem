@@ -5,10 +5,11 @@ import Messages.MessageParser;
 
 import java.net.*;
 import java.io.*;
+import java.security.MessageDigest;
 
 public class ChunkServer {
-    public static int serverPort;
-    public static String storageDir;
+    static int serverPort;
+    static String storageDir;
 
     public static void main(String[] args) {
         //Start ChunkServer.ChunkServerClient connection to controller - manages heartbeats
@@ -70,10 +71,8 @@ public class ChunkServer {
                         break;
                     case FORWARD_TO:
                         String message = input.readUTF();
-                        System.out.println("Message is: " + message);
                         MessageParser parsedInput = new MessageParser(message);
                         String filename = input.readUTF();
-                        System.out.println("Filename is: " + filename);
                         String addr = parsedInput.getValue().split("_")[0];
                         int port = Integer.parseInt(parsedInput.getValue().split("_")[1]);
 

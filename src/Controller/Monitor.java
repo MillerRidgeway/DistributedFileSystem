@@ -6,10 +6,8 @@ import Messages.MessageParser;
 import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.TimerTask;
 
 public class Monitor extends TimerTask {
@@ -100,7 +98,6 @@ public class Monitor extends TimerTask {
                         out.writeUTF(files[i]);
                         out.close();
                         s.close();
-
 
                         System.out.println("Finished sending request for " + files[i]);
                     } catch (Exception ex) {

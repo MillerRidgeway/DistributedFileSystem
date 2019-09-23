@@ -4,6 +4,7 @@ import Messages.MessageParser;
 
 import java.io.*;
 import java.net.Socket;
+import java.security.MessageDigest;
 
 public class ChunkServerRecv extends Thread {
     final Socket s;
@@ -26,10 +27,6 @@ public class ChunkServerRecv extends Thread {
             //Get the locations to forward to
             String forwardMessage = dis.readUTF();
             MessageParser parseForward = new MessageParser(forwardMessage);
-//            System.out.println("Parsed KV string: " + parseForward.getParsedKV());
-//            System.out.println("Parsed Key: " + parseForward.getKey());
-//            System.out.println("Parsed Value: " + parseForward.getValue());
-//            System.out.println("");
 
             //Get file from client
             int count;
@@ -38,6 +35,15 @@ public class ChunkServerRecv extends Thread {
             while ((count = dis.read(buf)) > 0) {
                 fos.write(buf, 0, count);
             }
+
+            //Store the file hash
+            MessageDigest sha1Digest = MessageDigest.getInstance("SHA1");
+            File newChunk = new File(ChunkServer.storageDir + filename);
+            String checksum = FileHash.getFileChecksum(sha1Digest, newChunk);
+            synchronized (ChunkServerClient.fileHashes) {
+                ChunkServerClient.fileHashes.put(filename, checksum);
+            }
+            System.out.println("Hash for file " + filename + " is:" + checksum);
 
             //Add the files to locally tracked list of files
             synchronized (ChunkServerClient.files) {
@@ -48,6 +54,8 @@ public class ChunkServerRecv extends Thread {
             }
 
             System.out.println("Upload complete: " + filename);
+
+            //Forward the file based on the contents of the forward message
             if (!parseForward.getValue().contains("null")) {
                 String addrPort = parseForward.getValue().split("-")[0];
                 String addr = addrPort.split("_")[0];
