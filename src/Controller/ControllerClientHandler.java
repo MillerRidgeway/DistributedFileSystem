@@ -96,7 +96,7 @@ public class ControllerClientHandler extends Thread {
                         output.writeUTF(toreturn);
                         System.out.println("Replied with sendTo");
 
-                        payload.put("forwardTo", forwardList);
+                        payload.put("forwardTo", "null");
                         toreturn = MessageParser.mapToString("forwardTo", payload);
                         output.writeUTF(toreturn);
                         System.out.println("Replied with forwardTo" + "\n");

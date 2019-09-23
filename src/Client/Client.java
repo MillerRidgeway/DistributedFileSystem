@@ -57,7 +57,7 @@ public class Client {
                             tosend = scn.nextLine();
 
                             fileToSend = new File(tosend);
-                            chunks = FileChunkManager.chunkFile(fileToSend);
+                            chunks = FileChunkManager.chunkFileErasure(fileToSend);
                             payload.put("send", Integer.toString(chunks));
                             tosend = MessageParser.mapToString("send", payload);
 
@@ -126,10 +126,10 @@ public class Client {
 
                                 //Send fileChunkName to ChunkServer.ChunkServerRecv
                                 //as well as the forwarding locations
-                                String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
+                                String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i);
                                 outUpload.writeUTF(fileChunkName);
 
-                                payload.put("forwardTo", forwardServers[i]);
+                                payload.put("forwardTo", "null");
                                 outUpload.writeUTF(MessageParser.mapToString("forwardTo", payload));
 
                                 //Send a chunk to the chunk server
@@ -202,7 +202,7 @@ public class Client {
                         }
 
                         Collections.sort(filesToMerge);
-                        FileChunkManager.mergeChunks(filesToMerge, payload.get("pull"));
+                        FileChunkManager.mergeChunksErasure(fileList, payload.get("pull"));
 
                         for (String fName : filesToMerge) {
                             File f = new File(fName);
