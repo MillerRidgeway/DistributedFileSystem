@@ -1,9 +1,7 @@
 package Client;
 
-import ChunkServer.ChunkServer;
 import Messages.ConnectionType;
 import Messages.MessageParser;
-import com.sun.source.tree.CatchTree;
 
 import java.io.*;
 import java.net.*;
@@ -13,15 +11,20 @@ import java.util.*;
 // Client.Client class
 public class Client {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         try {
+
+            final InetAddress controllerAddr = InetAddress.getByName(args[0]);
+            final int controllerPort = Integer.parseInt(args[1]);
+            final String replicationScheme = args[2];
+
+            System.out.println("Sent connect to " + args[0] + " on port " + controllerPort
+                    + " using the " + replicationScheme + " encoding scheme.");
+
             Scanner scn = new Scanner(System.in);
 
-            // getting localhost ip
-            InetAddress ip = InetAddress.getByName("localhost");
-
             // establish the connection to the controller with server port 444
-            Socket s = new Socket(ip, 444);
+            Socket s = new Socket(controllerAddr, controllerPort);
 
             // obtaining input and out streams
             DataInputStream dis = new DataInputStream(s.getInputStream());
@@ -42,7 +45,7 @@ public class Client {
                 System.out.println("What do you want? [Send | Pull | Exit]");
 
                 boolean isNotValid = true;
-                while(isNotValid) {
+                while (isNotValid) {
                     //Parse the command and then take the appropriate action
                     String tosend = scn.nextLine();
                     switch (tosend.toLowerCase()) {
@@ -57,7 +60,11 @@ public class Client {
                             tosend = scn.nextLine();
 
                             fileToSend = new File(tosend);
-                            chunks = FileChunkManager.chunkFileErasure(fileToSend);
+                            if (replicationScheme.equalsIgnoreCase("erasure"))
+                                chunks = FileChunkManager.chunkFileErasure(fileToSend);
+                            else
+                                chunks = FileChunkManager.chunkFile(fileToSend);
+
                             payload.put("send", Integer.toString(chunks));
                             tosend = MessageParser.mapToString("send", payload);
 
@@ -126,10 +133,14 @@ public class Client {
 
                                 //Send fileChunkName to ChunkServer.ChunkServerRecv
                                 //as well as the forwarding locations
-                                String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i);
+                                String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
                                 outUpload.writeUTF(fileChunkName);
 
-                                payload.put("forwardTo", "null");
+                                if (replicationScheme.equalsIgnoreCase("erasure"))
+                                    payload.put("forwardTo", "null");
+                                else
+                                    payload.put("forwardTo", forwardServers[i]);
+
                                 outUpload.writeUTF(MessageParser.mapToString("forwardTo", payload));
 
                                 //Send a chunk to the chunk server
@@ -185,24 +196,29 @@ public class Client {
                         //Merge the file chunks into an output file once again.
                         //May find a corrupted chunk, if we do report the corrupted
                         //chunk to the controller
-                        boolean noCorruptedChunks = true;
-                        for (int i = 0; i < filesToMerge.size(); i++) {
-                            File f = new File(filesToMerge.get(i));
-                            if (f.length() == 0) {
-                                noCorruptedChunks = false;
-                                System.out.println("File chunk " + f + " is corrupted.");
-                                payload.put("corruptChunkFound", filesToMerge.get(i) + "," + serverList[i]);
-                                out.writeUTF(MessageParser.mapToString("corruptChunkFound", payload));
+                        if (!replicationScheme.equalsIgnoreCase("erasure")) {
+                            boolean noCorruptedChunks = true;
+                            for (int i = 0; i < filesToMerge.size(); i++) {
+                                File f = new File(filesToMerge.get(i));
+                                if (f.length() == 0) {
+                                    noCorruptedChunks = false;
+                                    System.out.println("File chunk " + f + " is corrupted.");
+                                    payload.put("corruptChunkFound", filesToMerge.get(i) + "," + serverList[i]);
+                                    out.writeUTF(MessageParser.mapToString("corruptChunkFound", payload));
+                                }
                             }
-                        }
-                        if (!noCorruptedChunks) {
-                            System.out.println("File you downloaded has corrupted chunk(s). " +
-                                    "Please attempt to re-download the file");
-                            break;
+                            if (!noCorruptedChunks) {
+                                System.out.println("File you downloaded has corrupted chunk(s). " +
+                                        "Please attempt to re-download the file");
+                                break;
+                            }
                         }
 
                         Collections.sort(filesToMerge);
-                        FileChunkManager.mergeChunksErasure(fileList, payload.get("pull"));
+                        if (replicationScheme.equalsIgnoreCase("erasure"))
+                            FileChunkManager.mergeChunksErasure(fileList, payload.get("pull"));
+                        else
+                            FileChunkManager.mergeChunks(filesToMerge, payload.get("pull"));
 
                         for (String fName : filesToMerge) {
                             File f = new File(fName);

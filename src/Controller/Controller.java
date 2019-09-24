@@ -11,6 +11,7 @@ public class Controller {
     public static final Map<String, String> files = new TreeMap<>();
     public static final Map<String, String> servers = new HashMap<>();
     public static final Map<Socket, Integer> serverPorts = new HashMap<>();
+    public static String replicationScheme = "";
 
     static String getChunkServer() throws UnknownHostException {
         synchronized (currentChunkConnections) {
@@ -47,7 +48,11 @@ public class Controller {
 
     public static void main(String[] args) {
         //Host port
-        final int PORT_NUMBER = 444;
+        final int PORT_NUMBER = Integer.parseInt(args[0]);
+        replicationScheme = args[1];
+
+        System.out.println("Started controller service on port " + PORT_NUMBER +
+                " using encoding scheme " + replicationScheme);
 
         //Socket / Server / Keepalive
         ServerSocket listener;

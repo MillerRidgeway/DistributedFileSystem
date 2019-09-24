@@ -49,7 +49,7 @@ public class FileChunkManager {
 
         // Write out the resulting files.
         for (int i = 0; i < TOTAL_SHARDS; i++) {
-            String chunkFileName = String.format("%s.%03d", f.getName(), i);
+            String chunkFileName = String.format("%s.%03d", f.getName(), i + 1);
             File outputFile = new File(f.getParentFile(), chunkFileName);
             OutputStream out = new FileOutputStream(outputFile);
             out.write(shards[i]);
@@ -96,7 +96,7 @@ public class FileChunkManager {
         int shardCount = 0;
         File destination = new File(destName);
         for (int i = 0; i < TOTAL_SHARDS; i++) {
-            String chunkFileName = String.format("%s.%03d", destination.getName(), i);
+            String chunkFileName = String.format("%s.%03d", destination.getName(), i + 1);
             File shardFile = new File(destination.getParentFile(), chunkFileName);
             if (shardFile.exists()) {
                 shardSize = (int) shardFile.length();

@@ -96,7 +96,10 @@ public class ControllerClientHandler extends Thread {
                         output.writeUTF(toreturn);
                         System.out.println("Replied with sendTo");
 
-                        payload.put("forwardTo", "null");
+                        if (Controller.replicationScheme.equalsIgnoreCase("erasure"))
+                            payload.put("forwardTo", "null");
+                        else
+                            payload.put("forwardTo", forwardList);
                         toreturn = MessageParser.mapToString("forwardTo", payload);
                         output.writeUTF(toreturn);
                         System.out.println("Replied with forwardTo" + "\n");
