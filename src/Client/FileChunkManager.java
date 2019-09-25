@@ -13,9 +13,9 @@ import java.nio.ByteBuffer;
 import static java.nio.file.StandardOpenOption.*;
 
 public class FileChunkManager {
-    public static final int DATA_SHARDS = 4;
-    public static final int PARITY_SHARDS = 2;
-    public static final int TOTAL_SHARDS = 6;
+    public static final int DATA_SHARDS = 6;
+    public static final int PARITY_SHARDS = 3;
+    public static final int TOTAL_SHARDS = 9;
     public static final int BYTES_IN_INT = 4;
 
     //Adapted from https://www.backblaze.com/open-source-reed-solomon.html
@@ -49,7 +49,7 @@ public class FileChunkManager {
 
         // Write out the resulting files.
         for (int i = 0; i < TOTAL_SHARDS; i++) {
-            String chunkFileName = String.format("%s.%03d", f.getName(), i + 1);
+            String chunkFileName = String.format("%s.shard%d", f.getName(), i + 1);
             File outputFile = new File(f.getParentFile(), chunkFileName);
             OutputStream out = new FileOutputStream(outputFile);
             out.write(shards[i]);
@@ -87,18 +87,15 @@ public class FileChunkManager {
     }
 
     public static void mergeChunksErasure(String[] fileNames, String destName) throws IOException {
-        // Read in any of the shards that are present.
-        // (There should be checking here to make sure the input
-        // shards are the same size, but there isn't.)
         final byte[][] shards = new byte[TOTAL_SHARDS][];
         final boolean[] shardPresent = new boolean[TOTAL_SHARDS];
         int shardSize = 0;
         int shardCount = 0;
         File destination = new File(destName);
         for (int i = 0; i < TOTAL_SHARDS; i++) {
-            String chunkFileName = String.format("%s.%03d", destination.getName(), i + 1);
+            String chunkFileName = String.format("%s.shard%d", destination.getName(), i + 1);
             File shardFile = new File(destination.getParentFile(), chunkFileName);
-            if (shardFile.exists()) {
+            if (shardFile.exists() && shardFile.length() != 0) {
                 shardSize = (int) shardFile.length();
                 shards[i] = new byte[shardSize];
                 shardPresent[i] = true;
@@ -106,7 +103,10 @@ public class FileChunkManager {
                 InputStream in = new FileInputStream(shardFile);
                 in.read(shards[i], 0, shardSize);
                 in.close();
-                System.out.println("Read " + shardFile);
+                System.out.println(shardFile + "...");
+            }
+            else{
+                System.out.println("Shard " + shardFile.getName() + " has been corrupted or lost.");
             }
         }
 

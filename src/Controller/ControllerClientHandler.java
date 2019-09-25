@@ -55,9 +55,6 @@ public class ControllerClientHandler extends Thread {
 
         try {
             while (true) {
-                // Ask user what he wants
-//                output.writeUTF("What do you want? [Send | Pull | Exit]..\n");
-
                 // receive the answer from client
                 received = input.readUTF();
 
@@ -100,6 +97,7 @@ public class ControllerClientHandler extends Thread {
                             payload.put("forwardTo", "null");
                         else
                             payload.put("forwardTo", forwardList);
+
                         toreturn = MessageParser.mapToString("forwardTo", payload);
                         output.writeUTF(toreturn);
                         System.out.println("Replied with forwardTo" + "\n");
