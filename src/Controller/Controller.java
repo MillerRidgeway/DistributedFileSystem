@@ -22,7 +22,6 @@ public class Controller {
                 String key = s.getInetAddress().getHostAddress();
                 String keyWPort = key + "_" + serverPorts.get(s);
                 if (spaceAtServer.get(keyWPort) > 1000000000) {
-                    System.out.println("added valid connection");
                     validConnections.add(s);
                 }
             }

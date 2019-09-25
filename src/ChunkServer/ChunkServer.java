@@ -15,11 +15,13 @@ public class ChunkServer {
         //Start ChunkServer.ChunkServerClient connection to controller - manages heartbeats
         //controller interactions, etc.
 
-        storageDir = args[0];
+
         System.out.println("Storage dir is: " + storageDir);
         try {
-            InetAddress ip = InetAddress.getByName("localhost");
-            Socket controllerSocket = new Socket(ip, 444);
+            InetAddress controllerAddr = InetAddress.getByName(args[0]);
+            int controllerPort = Integer.parseInt(args[1]);
+            storageDir = args[2];
+            Socket controllerSocket = new Socket(controllerAddr, controllerPort);
             DataInputStream dis = new DataInputStream(controllerSocket.getInputStream());
             DataOutputStream out = new DataOutputStream(controllerSocket.getOutputStream());
 

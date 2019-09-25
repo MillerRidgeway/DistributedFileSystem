@@ -17,6 +17,7 @@ public class Client {
             final InetAddress controllerAddr = InetAddress.getByName(args[0]);
             final int controllerPort = Integer.parseInt(args[1]);
             final String replicationScheme = args[2];
+            final String tempdir = args[3];
 
             System.out.println("Sent connect to " + args[0] + " on port " + controllerPort
                     + " using the " + replicationScheme + " encoding scheme.");
@@ -66,7 +67,7 @@ public class Client {
                                 originalChunks = chunks;
                                 for (int i = 0; i < originalChunks; i++) {
                                     String fileChunkName = String.format("%s.%03d", fileToSend.getName(), i + 1);
-                                    File chunkFileToEncode = new File("src\\" + fileChunkName);
+                                    File chunkFileToEncode = new File(tempdir + fileChunkName);
                                     shards += FileChunkManager.chunkFileErasure(chunkFileToEncode);
                                     chunkFileToEncode.delete();
                                 }
@@ -129,7 +130,7 @@ public class Client {
 
                         //Build an ArrayList of chunks/shards that match the filename we are
                         //trying to send
-                        File dir = new File("src\\ ");
+                        File dir = new File(tempdir);
                         final File finalFileToSend = fileToSend;
                         File[] foundFiles = dir.listFiles();
                         ArrayList<File> matchingFiles = new ArrayList<>();
