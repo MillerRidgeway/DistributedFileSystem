@@ -1,7 +1,7 @@
 Distributed file system that utilizes a central controller node for organization and host nodes for redundancy and serving.
 
 
-##Program Arguments
+##Program Arguments##
 **Controller**: HOST_PORT | ENCODING
 
 **Client**: CONTROLLER_ADDR | CONTROLLER_PORT | ENCODING | TEMP_DIR
