@@ -104,8 +104,7 @@ public class FileChunkManager {
                 in.read(shards[i], 0, shardSize);
                 in.close();
                 System.out.println(shardFile + "...");
-            }
-            else{
+            } else {
                 System.out.println("Shard " + shardFile.getName() + " has been corrupted or lost.");
             }
         }

@@ -212,9 +212,14 @@ public class Client {
                                 fos.write(buf, 0, count);
                             }
                             filesToMerge.add(fileList[i]);
+
+                            fos.close();
+                            disPull.close();
+                            outPull.close();
                         }
 
-
+                        //If using the shard scheme, put these shards back into chunks
+                        //storing those chunk names in finalMergeList
                         if (replicationScheme.equalsIgnoreCase("erasure")) {
                             for (int j = 0; j < fileList.length / FileChunkManager.TOTAL_SHARDS; j++) {
                                 List<String> chunkFileShards = filesToMerge.subList(j * FileChunkManager.TOTAL_SHARDS, (j * FileChunkManager.TOTAL_SHARDS) + 9);
@@ -227,7 +232,8 @@ public class Client {
                             }
                         }
                         //May find a corrupted chunk, if we do report the corrupted
-                        //chunk to the controller and ask the user to re-download
+                        //chunk to the controller and ask the user to re-download.
+                        //If not, add the file to the finalMergeList
                         else {
                             boolean noCorruptedChunks = true;
                             for (int i = 0; i < filesToMerge.size(); i++) {
@@ -248,10 +254,15 @@ public class Client {
                         }
 
                         FileChunkManager.mergeChunks(finalMergeList, payload.get("pull"));
-
+                        //Delete the temp files
                         for (String fName : filesToMerge) {
-                            File f = new File("C:\\Users\\Miller Ridgeway\\IdeaProjects\\DistributedFilesystem" + fName);
-                            f.delete();
+                            File f = new File(fName);
+                            System.out.println("Deleting file " + fName + ":" + f.delete());
+                        }
+
+                        for (String fName : finalMergeList) {
+                            File f = new File(fName);
+                            System.out.println("Deleting file " + fName + ":" + f.delete());
                         }
                         break;
                     default:
