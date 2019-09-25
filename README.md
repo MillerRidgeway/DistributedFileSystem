@@ -1,4 +1,4 @@
-Distributed file system that utilizes a central controller node for organization and host nodes for redundancy and serving.
+<span style="font-size:larger;"> Distributed file system that utilizes a central controller node for organization and host nodes for redundancy and serving.</span>
 
 
 Program Arguments
