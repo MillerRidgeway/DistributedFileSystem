@@ -1,7 +1,10 @@
-<span style="font-size:larger;"> Distributed file system that utilizes a central controller node for organization and host nodes for redundancy and serving.</span>
+Info
+====
+
+Distributed file system that utilizes a central controller node for organization and host nodes for redundancy and serving.
 
 
-Program Arguments
+Usage
 =================
 
 **Controller**: HOST_PORT | ENCODING
