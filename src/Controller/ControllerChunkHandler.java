@@ -21,34 +21,19 @@ public class ControllerChunkHandler extends Thread {
     @Override
     public void run() {
         String received;
-        String toreturn;
-
         try {
             while (true) {
-                output.writeUTF("Connected to controller - [Exit] to exit");
+                output.writeUTF("Connection to controller successful.");
 
-                // receive the answer from client
                 received = input.readUTF();
 
-                if (received.equalsIgnoreCase("exit")) {
-                    System.out.println("Client " + this.connection + " sends exit...");
-                    System.out.println("Closing this connection.");
-                    this.connection.close();
-                    System.out.println("Connection closed");
-                    break;
-                }
-
-
-                // write on output stream based on the
-                // answer from the client
-                //Create and print the parsed message
                 MessageParser parser = new MessageParser(received);
-//                System.out.println("Parsed KV string: " + parser.getParsedKV());
-//                System.out.println("Parsed Key: " + parser.getKey());
-//                System.out.println("Parsed Value: " + parser.getValue() + "\n");
-
                 switch (parser.getKey()) {
                     case "minorHeartbeat":
+                        long spaceHere = input.readLong();
+                        Controller.spaceAtServer.put(connection.getInetAddress().getHostAddress() +
+                                "_" + Controller.serverPorts.get(connection), spaceHere);
+
                         if (!parser.getValue().equals("null")) {
                             String[] files = parser.getValue().split(",");
                             System.out.println("New files at: " + connection.getInetAddress().getHostAddress() + "_" + connection.getPort());
@@ -62,12 +47,12 @@ public class ControllerChunkHandler extends Thread {
                         }
                         break;
                     default:
-                        output.writeUTF("Invalid input");
+                        output.writeUTF("Invalid message type in ControllerChunkHandler");
                         break;
                 }
             }
         } catch (IOException e) {
-            System.out.println("May have lost a connection to a chunk server");
+            System.out.println("Likely have lost a connection to a chunk server");
             System.out.println("Error message is: " + e);
         }
     }

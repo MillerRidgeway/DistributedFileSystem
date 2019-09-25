@@ -11,20 +11,48 @@ public class Controller {
     public static final Map<String, String> files = new TreeMap<>();
     public static final Map<String, String> servers = new HashMap<>();
     public static final Map<Socket, Integer> serverPorts = new HashMap<>();
+    public static final Map<String, Long> spaceAtServer = new TreeMap<>();
     public static String replicationScheme = "";
 
     static String getChunkServer() throws UnknownHostException {
-        synchronized (currentChunkConnections) {
-            //TODO - Account for space remaining at each server
-            //Do this based on available space within each chunk server - for now just give a
-            //random chunk server
-            Random r = new Random();
-            int randIndex = r.nextInt(currentChunkConnections.size());
+        ArrayList<Socket> validConnections = new ArrayList<>();
 
-            Socket chunkServer = currentChunkConnections.get(randIndex);
-            return chunkServer.getInetAddress().getHostAddress() + "_" +
-                    serverPorts.get(chunkServer);
+        synchronized (currentChunkConnections) {
+            for (Socket s : currentChunkConnections) {
+                String key = s.getInetAddress().getHostAddress();
+                String keyWPort = key + "_" + serverPorts.get(s);
+                if (spaceAtServer.get(keyWPort) > 10000000000L) {
+                    System.out.println("added valid connection");
+                    validConnections.add(s);
+                }
+            }
         }
+
+        String server = "";
+        Socket chunkServer = null;
+        if (validConnections.size() == 0) {
+            Long mostSpace = 0L;
+            for (Map.Entry<String, Long> e : spaceAtServer.entrySet()) {
+                if (e.getValue() > mostSpace) {
+                    mostSpace = e.getValue();
+                    server = e.getKey();
+                }
+            }
+
+            synchronized (currentChunkConnections) {
+                for (Socket s : currentChunkConnections) {
+                    if (s.getInetAddress().getHostAddress().equalsIgnoreCase(server))
+                        chunkServer = s;
+                }
+            }
+        } else {
+            Random r = new Random();
+            int randIndex = r.nextInt(validConnections.size());
+
+            chunkServer = validConnections.get(randIndex);
+        }
+        return chunkServer.getInetAddress().getHostAddress() + "_" +
+                serverPorts.get(chunkServer);
     }
 
     static void addFile(String filename, String addr) {
