@@ -1,7 +1,7 @@
 Info
 ====
 
-Distributed file system that utilizes a central controller node for organization and host nodes for redundancy and serving.
+Distributed file system that utilizes a central controller node for organization and host nodes for redundancy and serving. Written entirely in Java with no library support *other* than for erasure encoding (Reed-Solomon).
 
 
 Usage
