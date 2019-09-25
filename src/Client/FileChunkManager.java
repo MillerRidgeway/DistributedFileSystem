@@ -50,7 +50,7 @@ public class FileChunkManager {
         // Write out the resulting files.
         for (int i = 0; i < TOTAL_SHARDS; i++) {
             String chunkFileName = String.format("%s.shard%d", f.getName(), i + 1);
-            File outputFile = new File(f.getParentFile(), chunkFileName);
+            File outputFile = new File(Client.tempdir, chunkFileName);
             OutputStream out = new FileOutputStream(outputFile);
             out.write(shards[i]);
             out.close();
@@ -75,7 +75,7 @@ public class FileChunkManager {
             int bytesRemain = 0;
             while ((bytesRemain = bis.read(buffer)) > 0) {
                 String chunkFileName = String.format("%s.%03d", fName, chunkCount++);
-                File newFile = new File(f.getParent(), chunkFileName);
+                File newFile = new File(Client.tempdir, chunkFileName);
 
                 try (FileOutputStream out = new FileOutputStream(newFile)) {
                     out.write(buffer, 0, bytesRemain);
@@ -94,7 +94,8 @@ public class FileChunkManager {
         File destination = new File(destName);
         for (int i = 0; i < TOTAL_SHARDS; i++) {
             String chunkFileName = String.format("%s.shard%d", destination.getName(), i + 1);
-            File shardFile = new File(destination.getParentFile(), chunkFileName);
+            File shardFile = new File(Client.tempdir + chunkFileName);
+            System.out.println(shardFile.getPath());
             if (shardFile.exists() && shardFile.length() != 0) {
                 shardSize = (int) shardFile.length();
                 shards[i] = new byte[shardSize];
@@ -137,18 +138,19 @@ public class FileChunkManager {
         int fileSize = ByteBuffer.wrap(allBytes).getInt();
 
         // Write the decoded file
-        File decodedFile = new File(destination.getParentFile(), destination.getName());
+        File decodedFile = new File(Client.tempdir, destination.getName());
         OutputStream out = new FileOutputStream(decodedFile);
         out.write(allBytes, BYTES_IN_INT, fileSize);
+        out.close();
         System.out.println("Wrote new file: " + decodedFile);
     }
 
     public static void mergeChunks(ArrayList<String> fNames, String dest) throws IOException {
-        Path outFile = Paths.get(dest);
+        Path outFile = Paths.get(Client.tempdir + dest);
         System.out.println("Merging chunks back into file: " + outFile);
         try (FileChannel out = FileChannel.open(outFile, CREATE, WRITE)) {
             for (int i = 0, size = fNames.size(); i < size; i++) {
-                Path inFile = Paths.get(fNames.get(i));
+                Path inFile = Paths.get(Client.tempdir + fNames.get(i));
                 if (Files.size(inFile) == 0)
                     throw new IOException("Chunk " + fNames.get(i) + " corrupted. ");
                 System.out.println(inFile + "...");

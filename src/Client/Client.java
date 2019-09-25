@@ -10,6 +10,7 @@ import java.util.*;
 
 // Client.Client class
 public class Client {
+    public static String tempdir;
 
     public static void main(String[] args) {
         try {
@@ -17,7 +18,7 @@ public class Client {
             final InetAddress controllerAddr = InetAddress.getByName(args[0]);
             final int controllerPort = Integer.parseInt(args[1]);
             final String replicationScheme = args[2];
-            final String tempdir = args[3];
+            tempdir = args[3];
 
             System.out.println("Sent connect to " + args[0] + " on port " + controllerPort
                     + " using the " + replicationScheme + " encoding scheme.");
@@ -167,7 +168,7 @@ public class Client {
                                 outUpload.writeUTF(MessageParser.mapToString("forwardTo", payload));
 
                                 //Send a chunk to the chunk server
-                                File chunk = new File(fileToSend.getParent() + "\\" + fileChunkName);
+                                File chunk = new File(tempdir + fileChunkName);
                                 byte[] buf = Files.readAllBytes(chunk.toPath());
                                 outUpload.write(buf);
                                 chunk.delete();
@@ -207,7 +208,7 @@ public class Client {
                             //Get file from chunk server
                             int count;
                             byte[] buf = new byte[64000];
-                            FileOutputStream fos = new FileOutputStream(fileList[i]);
+                            FileOutputStream fos = new FileOutputStream(tempdir + fileList[i]);
 
                             while ((count = disPull.read(buf)) > 0) {
                                 fos.write(buf, 0, count);
@@ -238,7 +239,7 @@ public class Client {
                         else {
                             boolean noCorruptedChunks = true;
                             for (int i = 0; i < filesToMerge.size(); i++) {
-                                File f = new File(filesToMerge.get(i));
+                                File f = new File(tempdir + filesToMerge.get(i));
                                 if (f.length() == 0) {
                                     noCorruptedChunks = false;
                                     System.out.println("File chunk " + f + " is corrupted.");
@@ -257,12 +258,12 @@ public class Client {
                         FileChunkManager.mergeChunks(finalMergeList, payload.get("pull"));
                         //Delete the temp files
                         for (String fName : filesToMerge) {
-                            File f = new File(fName);
+                            File f = new File(tempdir + fName);
                             System.out.println("Deleting file " + fName + ":" + f.delete());
                         }
 
                         for (String fName : finalMergeList) {
-                            File f = new File(fName);
+                            File f = new File(tempdir + fName);
                             System.out.println("Deleting file " + fName + ":" + f.delete());
                         }
                         break;
