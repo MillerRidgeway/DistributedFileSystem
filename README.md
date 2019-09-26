@@ -15,3 +15,5 @@ Usage
 
 **ENCODING:** If set to "erasure", uses Reed-Solomon to encode chunks. 
 Anything else replicates the shards across multiple servers.
+
+**TEMP_DIR:** A directory to store intermediary and output files. Intermediary files will be removed by the program before the user can see them. 
