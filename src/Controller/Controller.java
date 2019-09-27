@@ -132,7 +132,7 @@ public class Controller {
                         }
 
                         //Keepalive monitor
-                        Monitor m = new Monitor(connection.getInetAddress().getHostName(), serverPort);
+                        Monitor m = new Monitor(connection.getInetAddress().getHostAddress(), serverPort);
                         statusCheck.schedule(m, 0, 10000);
 
                         System.out.println("Chunk servers connected: " + currentChunkConnections.size() + "\n");
